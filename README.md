@@ -1,4 +1,4 @@
-# Learn Go with Tests
+# 测试驱动 Go 语言导学
 
 <p align="center">
   <img src="red-green-blue-gophers-smaller.png" />
@@ -9,15 +9,15 @@
 [![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)](https://travis-ci.org/quii/learn-go-with-tests)
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
-- Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
-- Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+-   Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
+-   Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 
 ## Why
 
-* Explore the Go language by writing tests
-* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
-* Be confident that you'll be able to start writing robust, well-tested systems in Go
-* [Watch a video, or read about why unit testing and TDD is important](why.md)
+-   Explore the Go language by writing tests
+-   **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
+-   Be confident that you'll be able to start writing robust, well-tested systems in Go
+-   [Watch a video, or read about why unit testing and TDD is important](why.md)
 
 ## Table of contents
 
@@ -36,10 +36,10 @@
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection
-13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
-13. [Context](context.md) - Use the context package to manage and cancel long-running processes
-14. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
-15. [Maths](math.md) - Use the `math` package to draw an SVG clock
+14. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
+15. [Context](context.md) - Use the context package to manage and cancel long-running processes
+16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
+17. [Maths](math.md) - Use the `math` package to draw an SVG clock
 
 ### Build an application
 
@@ -53,12 +53,12 @@ New concepts will be introduced to help facilitate writing great code but most o
 
 By the end of this, you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
 
-* [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
-* [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
-* [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
-* [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line.
-* [Time](time.md) - using the `time` package to schedule activities.
-* [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
+-   [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
+-   [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
+-   [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
+-   [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line.
+-   [Time](time.md) - using the `time` package to schedule activities.
+-   [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
 
 ### Questions and answers
 
@@ -68,14 +68,14 @@ I often run in to questions on the internets like
 
 If you have such a question raise it as an issue on github and I'll try and find time to write a short chapter to tackle the issue. I feel like content like this is valuable as it is tackling people's _real_ questions around testing.
 
-* [OS exec](os-exec.md) - An example of how we can reach out to the OS to execute commands to fetch data and keep our business logic testable/
-* [Error types](error-types.md) - Example of creating your own error types to improve your tests and make your code easier to work with.
+-   [OS exec](os-exec.md) - An example of how we can reach out to the OS to execute commands to fetch data and keep our business logic testable/
+-   [Error types](error-types.md) - Example of creating your own error types to improve your tests and make your code easier to work with.
 
 ## Contributing
 
-* _This project is work in progress_ If you would like to contribute, please do get in touch.
-* Read [contributing.md](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md) for guidelines
-* Any ideas? Create an issue
+-   _This project is work in progress_ If you would like to contribute, please do get in touch.
+-   Read [contributing.md](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md) for guidelines
+-   Any ideas? Create an issue
 
 ## Background
 
@@ -119,20 +119,20 @@ Taking my experience of learning with a group and my own personal way I am going
 
 ## Who this is for
 
-* People who are interested in picking up Go.
-* People who already know some Go, but want to explore testing with TDD.
+-   People who are interested in picking up Go.
+-   People who already know some Go, but want to explore testing with TDD.
 
 ## What you'll need
 
-* A computer!
-* [Installed Go](https://golang.org/)
-* A text editor
-* Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
-* Comfortable with using the terminal
+-   A computer!
+-   [Installed Go](https://golang.org/)
+-   A text editor
+-   Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
+-   Comfortable with using the terminal
 
 ## Feedback
 
-* Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
+-   Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
 
 [MIT license](LICENSE.md)
 
