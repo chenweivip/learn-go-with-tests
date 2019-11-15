@@ -4,35 +4,35 @@ import "testing"
 
 func TestHello(t *testing.T) {
 
-	assertCorrectMessage := func(got, want string) {
+	assertCorrectMessage := func(got, expected string) {
 		t.Helper()
-		if got != want {
-			t.Errorf("got %q want %q", got, want)
+		if got != expected {
+			t.Errorf("got %q expected %q", got, expected)
 		}
 	}
 
 	t.Run("saying hello to people", func(t *testing.T) {
-		got := Hello("Chris", "")
-		want := "Hello, Chris"
-		assertCorrectMessage(got, want)
+		got := Hello("Bobo", "")
+		expected := "Hello, Bobo"
+		assertCorrectMessage(got, expected)
 	})
 
 	t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
 		got := Hello("", "")
-		want := "Hello, World"
-		assertCorrectMessage(got, want)
+		expected := "Hello, World"
+		assertCorrectMessage(got, expected)
 	})
 
-	t.Run("say hello in Spanish", func(t *testing.T) {
-		got := Hello("Elodie", spanish)
-		want := "Hola, Elodie"
-		assertCorrectMessage(got, want)
+	t.Run("say hello in Chinese", func(t *testing.T) {
+		got := Hello("波波", chinese)
+		expected := "你好, 波波"
+		assertCorrectMessage(got, expected)
 	})
 
 	t.Run("say hello in French", func(t *testing.T) {
 		got := Hello("Lauren", french)
-		want := "Bonjour, Lauren"
-		assertCorrectMessage(got, want)
+		expected := "Bonjour, Lauren"
+		assertCorrectMessage(got, expected)
 	})
 
 }

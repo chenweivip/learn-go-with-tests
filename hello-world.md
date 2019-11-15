@@ -1,18 +1,12 @@
 # Hello, World
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)**
+**[本节课所有代码](https://github.com/spring2go/learn-go-with-tests/tree/master/hello-world)**
 
-It is traditional for your first program in a new language to be Hello, world.
+大家常用Hello, world作为学习新编程语言的第一个例子，本课也不例外。
 
-In the [previous chapter](install-go.md#go-environment) we discussed how Go is opinionated as to where you put your files.
+根据Go语言的惯例，请在如下位置创建目录：`$GOPATH/src/github.com/{your-user-id}/hello`，比方说在波波的机器上，创建的就是：`mkdir -p $GOPATH/src/github.com/bob/hello`。后续章节我们会沿用这个惯例。
 
-Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
-
-So if you're on a unix based OS and your username is "bob" and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p $GOPATH/src/github.com/bob/hello`.
-
-For subsequent chapters, you can make a new folder with whatever name you like to put the code in e.g `$GOPATH/src/github.com/{your-user-id}/integers` for the next chapter might be sensible. Some readers of this book like to make an enclosing folder for all the work such as "learn-go-with-tests/hello". In short, it's up to you how you structure your folders.
-
-Create a file in this directory called `hello.go` and write this code. To run it type `go run hello.go`.
+在hello目录中创建v1版本[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v1/hello.go)文件：
 
 ```go
 package main
@@ -24,19 +18,20 @@ func main() {
 }
 ```
 
-## How it works
+然后运行这个程序，打开一个终端窗口，进入hello目录，运行命令`go run hello.go`，可以看到Hello, world输出。
 
-When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together.
 
-The `func` keyword is how you define a function with a name and a body.
+## 这个程序是如何工作的？
 
-With `import "fmt"` we are importing a package which contains the `Println` function that we use to print.
+一个Go语言程序，需要一个主入口程序，这个主入口程序必须声明在`main`包中，并且必须在其中定义一个`main`函数。在Go语言中，包(package)是一种代码的组织单位。
 
-## How to test
+`func`关键字用于定义一个函数，函数有名字和函数体。
 
-How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\) and the string we send in is our domain.
+`import "fmt"`的作用是导入名称为`fmt`的包，程序中我们用到了`fmt`包中的`Println`打印函数，用于输出Hello, world。
 
-So let's separate these concerns so it's easier to test
+## 如何写测试？
+
+下面我们要来测试这个程序，为了让这个程序容易测试，我们需要调整一下代码，把输出Hello, world的功能独立出来，修改后的v2版[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v2/hello.go)程序如下：
 
 ```go
 package main
@@ -52,9 +47,9 @@ func main() {
 }
 ```
 
-We have created a new function again with `func` but this time we've added another keyword `string` in the definition. This means this function returns a `string`.
+我们单独创建一个名称为Hello的函数，函数声明以关键字`func`标示，并且需要标示说明这个函数的返回类型，这里是`string`，也就是说这个函数必须返回一个`string`类型的值。
 
-Now create a new file called `hello_test.go` where we are going to write a test for our `Hello` function
+下面我们可以来创建测试文件了，新建文件[`hello_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v2/hello_test.go)，这个程序用来测试`Hello`函数，代码如下：
 
 ```go
 package main
@@ -63,62 +58,60 @@ import "testing"
 
 func TestHello(t *testing.T) {
     got := Hello()
-    want := "Hello, world"
+    expected := "Hello, world"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
+    if got != expected {
+        t.Errorf("got %q expected %q", got, expected)
     }
 }
 ```
 
-Before explaining, let's just run the code. Run `go test` in your terminal. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
+直接在终端运行`go test`运行测试，这个测试应该可以通过，你尝试修改`expected`的值，故意让测试不通过。
 
-Notice how you have not had to pick between multiple testing frameworks and then figure out how to install. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write.
+**注意**：和其它语言如Java/C不同，Go语言中的每行语句后面是不需要加标点的。
 
-### Writing tests
+可以看到，Go语言是内置支持测试的，不需要蛮烦安装其它测试工具。
 
-Writing a test is just like writing a function, with a few rules
+### 测试规范
 
-* It needs to be in a file with a name like `xxx_test.go`
-* The test function must start with the word `Test`
-* The test function takes one argument only `t *testing.T`
+写测试和写函数类似，只需遵循一些规范：
 
-For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
+-   文件名必须以`_test.go`结尾，例如`xxx_test.go`。
+-   测试函数名必须以`Test`打头。
+-   测试函数接受且仅接受一个参数`t *testing.T`。
 
-We've covered some new topics:
+关于`t *testing.T`这个参数，目前你只需要知道这是对接测试框架的钩子(hook)参数，有了这个参数，你可以调用测试框架的方法，比如在测试失败时调用`t.Fail()`，让测试框架处理失败。
+
+下面有一些Go语言的语法说明：
 
 #### `if`
-If statements in Go are very much like other programming languages.
 
-#### Declaring variables
+If条件语句和其它语言类似，没必要多说。
 
-We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability.
+#### 声明变量+赋值
+
+`varName := value`是Go语言中的简写的变量声明+赋值。例如上面的`got := Hello()`，写全的话可以写成`var got string = Hello()`。Go语言的赋值语句具有自动类型推导能力，根据后面的赋值，Go语言可以自动推导出got是`string`类型，所以变量类型`string`可以省略，前面语句也可以写成var get = Hello()。把`var`再省略就可以写成got := Hello()。因为简写输入最少，我们在变量声明+赋值场合基本上都用简写。
 
 #### `t.Errorf`
 
-We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%q`. When you made the test fail it should be clear how it works.
+`t.Errorf`表示调用`t`上的_方法_`Errorf`，也就是测试失败时输出一个消息。`Errorf`中的`f`表示对参数进行格式化输出，可以把参数插入到格式化字符串的占位符(比如`%q`)部分，`%q`占位符参数可以把参数以双引号括起来。关于占位符的更多内容，请参考官方文档[fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing)。
 
-You can read more about the placeholder strings in the [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing). For tests `%q` is very useful as it wraps your values in double quotes.
 
-We will later explore the difference between methods and functions.
+关于方法和函数的区别，后续我们会进一步展开。
 
-### Go doc
+### 关于Go doc
 
-Another quality of life feature of Go is the documentation. You can launch the docs locally by running `godoc -http :8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg) you will see all the packages installed on your system.
+细致的文档是Go语言的一大特色。你可以在本地开启Go语言的文档服务，运行命令`godoc -http :8000`，然后浏览器访问[localhost:8000/pkg](http://localhost:8000/pkg)，就可以浏览本地安装的Go语言所支持的标准库。
 
-The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
+大部分Go语言的标准库都有不错的文档，而且还带样例。通过浏览器访问[http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/)，你就可以详细查看Go语言所支持的测试功能。
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go (1.13 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.13#godoc). You can manually install it with `go get golang.org/x/tools/cmd/godoc`.
+如果你在本地无法运行`godoc`命令，那么可能你安装的是较新版本的Go语言(1.13之后)，新版本[不再自动包含`godoc`](https://golang.org/doc/go1.13#godoc)。你可以手工安装，运行命令`go get golang.org/x/tools/cmd/godoc`即可，注意保持网络可访问！
 
-### Hello, YOU
+### 定制人名
 
-Now that we have a test we can iterate on our software safely.
+下面我们要扩展一下程序的功能，不再简单输出Hello, world，而是能够根据给定的人名输出，例如，输入"Bobo"，就输出"Hello, Bobo“。
 
-In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_.
-
-Our next requirement is to let us specify the recipient of the greeting.
-
-Let's start by capturing these requirements in a test. This is basic test driven development and allows us to make sure our test is _actually_ testing what we want. When you retrospectively write tests there is the risk that your test may continue to pass even if the code doesn't work as intended.
+按照测试驱动开发方法学的要求，我们先写测试代码[hello_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v3/hello_test.go):
 
 ```go
 package main
@@ -126,16 +119,16 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-    got := Hello("Chris")
-    want := "Hello, Chris"
+    got := Hello("Bobo")
+    expected := "Hello, Bobo"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
+    if got != expected {
+        t.Errorf("got %q expected %q", got, expected)
     }
 }
 ```
 
-Now run `go test`, you should have a compilation error
+然后运行测试 `go test`：
 
 ```text
 ./hello_test.go:6:18: too many arguments in call to Hello
@@ -143,35 +136,7 @@ Now run `go test`, you should have a compilation error
     want ()
 ```
 
-When using a statically typed language like Go it is important to _listen to the compiler_. The compiler understands how your code should snap together and work so you don't have to.
-
-In this case the compiler is telling you what you need to do to continue. We have to change our function `Hello` to accept an argument.
-
-Edit the `Hello` function to accept an argument of type string
-
-```go
-func Hello(name string) string {
-    return "Hello, world"
-}
-```
-
-If you try and run your tests again your `main.go` will fail to compile because you're not passing an argument. Send in "world" to make it pass.
-
-```go
-func main() {
-    fmt.Println(Hello("world"))
-}
-```
-
-Now when you run your tests you should see something like
-
-```text
-hello_test.go:10: got 'Hello, world' want 'Hello, Chris''
-```
-
-We finally have a compiling program but it is not meeting our requirements according to the test.
-
-Let's make the test pass by using the name argument and concatenate it with `Hello,`
+显然，测试无法运行，程序通不过编译，因为我们还没有修改Hello函数支持这个测试，修改v3版[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v3/hello.go)，支持定制人名：
 
 ```go
 func Hello(name string) string {
@@ -179,27 +144,15 @@ func Hello(name string) string {
 }
 ```
 
-When you run the tests they should now pass. Normally as part of the TDD cycle we should now _refactor_.
+### 常量
 
-### A note on source control
-
-At this point, if you are using source control \(which you should!\) I would
-`commit` the code as it is. We have working software backed by a test.
-
-I _wouldn't_ push to master though, because I plan to refactor next. It is nice
-to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
-
-There's not a lot to refactor here, but we can introduce another language feature _constants_.
-
-### Constants
-
-Constants are defined like so
+Go语言中的常量定义方式如下：
 
 ```go
 const englishHelloPrefix = "Hello, "
 ```
 
-We can now refactor our code
+下面我们重构一下代码v4版[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v4/hello.go)
 
 ```go
 const englishHelloPrefix = "Hello, "
@@ -209,27 +162,23 @@ func Hello(name string) string {
 }
 ```
 
-After refactoring, re-run your tests to make sure you haven't broken anything.
+所谓**重构(refactoring)**，就是在不改变程序功能逻辑的情况下，调整优化程序代码。在程序开发中，把经常用到的相同字符串常量化，是提升代码可读性和可维护性的一种最佳实践。经过上面的重构，再次运行测试，确保重构后程序逻辑正确。
 
-Constants should improve performance of your application as it saves you creating the `"Hello, "` string instance every time `Hello` is called.
+## 新需求
 
-To be clear, the performance boost is incredibly negligible for this example! But it's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
+下面我们要再次完善程序，当Hello函数输入我空字符串的时候，我们希望输出"Hello World"，而不是"Hello, "。
 
-## Hello, world... again
-
-The next requirement is when our function is called with an empty string it defaults to printing "Hello, World", rather than "Hello, ".
-
-Start by writing a new failing test
+我们先写测试：
 
 ```go
 func TestHello(t *testing.T) {
 
     t.Run("saying hello to people", func(t *testing.T) {
         got := Hello("Chris")
-        want := "Hello, Chris"
+        expected := "Hello, Chris"
 
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
+        if got != expected {
+            t.Errorf("got %q expected %q", got, expected)
         }
     })
 
@@ -237,58 +186,47 @@ func TestHello(t *testing.T) {
         got := Hello("")
         want := "Hello, World"
 
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
+        if got != expected {
+            t.Errorf("got %q expected %q", got, expected)
         }
     })
 
 }
 ```
 
-Here we are introducing another tool in our testing arsenal, subtests. Sometimes it is useful to group tests around a "thing" and then have subtests describing different scenarios.
+细心学员会发现，上面的测试代码有冗余，我们可以通过引入子测试(subtest)来重构优化代码。所谓子测试，其实就是公共可重用的测试逻辑。
 
-A benefit of this approach is you can set up shared code that can be used in the other tests.
-
-There is repeated code when we check if the message is what we expect.
-
-Refactoring is not _just_ for the production code!
-
-It is important that your tests _are clear specifications_ of what the code needs to do.
-
-We can and should refactor our tests.
+按如下方式重构测试代码：
 
 ```go
 func TestHello(t *testing.T) {
 
-    assertCorrectMessage := func(t *testing.T, got, want string) {
+    assertCorrectMessage := func(t *testing.T, got, expected string) {
         t.Helper()
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
+        if got != expected {
+            t.Errorf("got %q expected %q", got, expected)
         }
     }
 
     t.Run("saying hello to people", func(t *testing.T) {
         got := Hello("Chris")
-        want := "Hello, Chris"
-        assertCorrectMessage(t, got, want)
+        expected := "Hello, Chris"
+        assertCorrectMessage(t, got, expected)
     })
 
     t.Run("empty string defaults to 'World'", func(t *testing.T) {
         got := Hello("")
-        want := "Hello, World"
-        assertCorrectMessage(t, got, want)
+        expected := "Hello, World"
+        assertCorrectMessage(t, got, expected)
     })
 
 }
 ```
+上面的代码中，我们把断言逻辑抽取到一个子测试函数`assertCorrectMessage`中，这样可以提升重用度、代码可读和可维护性。Go语言支持在某个函数中再书写子函数，然后在函数中可以调用子函数。我们把参数`t *testing.T`传给`assertCorrectMessage`，这样就可以在子函数中访问测试框架的方法，比如错误输出。
 
-What have we done here?
+子函数中的`t.Helper()`方法告知测试框架在错误输出时，输出调用`assertCorrectMessage`语句的行号，而不是`assertCorrectMessage`子函数内的行号，这样可以方便开发人员跟踪问题。如果你还不理解`t.Helper()`的作用，可以故意修改测试让它失败，然后分别注释或者不注释`t.Helper()`这句，看看效果体会一下。
 
-We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In Go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
-
-`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output.
-
-Now that we have a well-written failing test, let's fix the code, using an `if`.
+显然，现在就运行测试会失败，因为我们还没有调整Hello函数的逻辑，调整代码v5版本[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v5/hello.go)，添加一个`if`条件判断，如下
 
 ```go
 const englishHelloPrefix = "Hello, "
@@ -301,83 +239,36 @@ func Hello(name string) string {
 }
 ```
 
-If we run our tests we should see it satisfies the new requirement and we haven't accidentally broken the other functionality.
+现在运行测试，确保测试可以通过。
 
-### Back to source control
 
-Now we are happy with the code I would amend the previous commit so we only
-check in the lovely version of our code with its test.
+### 测试驱动开发的纪律
 
-### Discipline
+一个典型的测试驱动开发流程包含如下步骤：
 
-Let's go over the cycle again
+1. 写测试
+2. 写程序逻辑
+3. 运行测试，调整程序逻辑，直到测试通过
+4. 重构(包括程序和测试）
 
-* Write a test
-* Make the compiler pass
-* Run the test, see that it fails and check the error message is meaningful
-* Write enough code to make the test pass
-* Refactor
+测试驱动开发的核心逻辑是**缩短反馈环**，要点是每次都写少量程序逻辑，通过测试快速获得反馈。这种方法虽然看起来前期要多花一些时间写测试，但是可以提升代码质量和可维护性，中长期可以提升开发效率，尤其在你后续需要重构的时候，已有的测试代码可以保障你快速重构。如果你一开始忽略测试，虽然短期看可以更快更多写代码，但是长期代码不可维护，难于重构。
 
-On the face of it this may seem tedious but sticking to the feedback loop is important.
+**注意**，实际开发中，第1～2步没有严格顺序要求，可以先写测试，再写程序逻辑，也可以倒过来，先写程序逻辑，再写测试，大部分程序员倾向后者。顺序并不重要，重要的是通过测试快速获取反馈。
 
-Not only does it ensure that you have _relevant tests_, it helps ensure _you design good software_ by refactoring with the safety of tests.
+## 再来一个新需求
 
-Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is.
+下面再来一个新需求，我们的Hello world程序，除了支持英文，现在要求支持中文，并且缺省支持的是英文。
 
-By ensuring your tests are _fast_ and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code.
-
-By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you won't be saving yourself any time, especially in the long run.
-
-## Keep going! More requirements
-
-Goodness me, we have more requirements. We now need to support a second parameter, specifying the language of the greeting. If a language is passed in that we do not recognise, just default to English.
-
-We should be confident that we can use TDD to flesh out this functionality easily!
-
-Write a test for a user passing in Spanish. Add it to the existing suite.
+添加一个测试：
 
 ```go
-    t.Run("in Spanish", func(t *testing.T) {
-        got := Hello("Elodie", "Spanish")
-        want := "Hola, Elodie"
-        assertCorrectMessage(t, got, want)
+    t.Run("in Chinese", func(t *testing.T) {
+        expected := Hello("波波", "Chinese")
+        want := "你好, 波波"
+        assertCorrectMessage(t, got, expected)
     })
 ```
-
-Remember not to cheat! _Test first_. When you try and run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
-
-```text
-./hello_test.go:27:19: too many arguments in call to Hello
-    have (string, string)
-    want (string)
-```
-
-Fix the compilation problems by adding another string argument to `Hello`
-
-```go
-func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
-    return englishHelloPrefix + name
-}
-```
-
-When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `hello.go`
-
-```text
-./hello.go:15:19: not enough arguments in call to Hello
-    have (string)
-    want (string, string)
-```
-
-Fix them by passing through empty strings. Now all your tests should compile _and_ pass, apart from our new scenario
-
-```text
-hello_test.go:29: got 'Hello, Elodie' want 'Hola, Elodie'
-```
-
-We can use `if` here to check the language is equal to "Spanish" and if so change the message
+修改v6版[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v6/hello.go)，支持中文(缺省英文)：
 
 ```go
 func Hello(name string, language string) string {
@@ -385,43 +276,49 @@ func Hello(name string, language string) string {
         name = "World"
     }
 
-    if language == "Spanish" {
-        return "Hola, " + name
+    if language == "Chinese" {
+        return "你好, " + name
     }
 
     return englishHelloPrefix + name
 }
 ```
 
-The tests should now pass.
+确保测试可以通过。
 
-Now it is time to _refactor_. You should see some problems in the code, "magic" strings, some of which are repeated. Try and refactor it yourself, with every change make sure you re-run the tests to make sure your refactoring isn't breaking anything.
+再次通过重构优化，提取常量字符串：
+
 
 ```go
-const spanish = "Spanish"
+const chinese = "Chinese"
 const englishHelloPrefix = "Hello, "
-const spanishHelloPrefix = "Hola, "
+const chineseHelloPrefix = "你好, "
 
 func Hello(name string, language string) string {
     if name == "" {
         name = "World"
     }
 
-    if language == spanish {
-        return spanishHelloPrefix + name
+    if language == chinese {
+        return chineseHelloPrefix + name
     }
 
     return englishHelloPrefix + name
 }
 ```
 
-### French
+再运行时测试，确保重构正确。
 
-* Write a test asserting that if you pass in `"French"` you get `"Bonjour, "`
-* See it fail, check the error message is easy to read
-* Do the smallest reasonable change in the code
 
-You may have written something that looks roughly like this
+### 支持法语
+
+沿用之前测试驱动开发步骤
+
+-   先写测试
+-   修改程序逻辑
+-   运行测试，调整程序逻辑，直到测试通过
+
+修改v6版[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v6/hello.go)，Hello函数逻辑如下：
 
 ```go
 func Hello(name string, language string) string {
@@ -429,8 +326,8 @@ func Hello(name string, language string) string {
         name = "World"
     }
 
-    if language == spanish {
-        return spanishHelloPrefix + name
+    if language == chinese {
+        return chineseHelloPrefix + name
     }
 
     if language == french {
@@ -441,9 +338,10 @@ func Hello(name string, language string) string {
 }
 ```
 
-## `switch`
+## `switch`语句
 
-When you have lots of `if` statements checking a particular value it is common to use a `switch` statement instead. We can use `switch` to refactor the code to make it easier to read and more extensible if we wish to add more language support later
+`if`语句过多，是程序复杂上升和可维护性下降的一个信号，我们可以通过`swich`语句进行重构，`switch`可以提升代码的可维护性和扩展性(假设我们后面要支持更多语言)。
+
 
 ```go
 func Hello(name string, language string) string {
@@ -464,11 +362,11 @@ func Hello(name string, language string) string {
 }
 ```
 
-Write a test to now include a greeting in the language of your choice and you should see how simple it is to extend our _amazing_ function.
+现在，学员应该对测试驱动开发有直观感受了，通过测试驱动开发，既可以保证我们代码的质量，同时可以提升我们的开发效率，当我们要实现新的需求，比如让我们的Hello, world支持一种新语言，我们可以快速开发和交付功能。
 
-### one...last...refactor?
+### 最后一个重构
 
-You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function.
+你可能觉得我们的Hello函数变得有点大了，好的，我们可以通过取出子函数进行重构，修改v8版本[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v8/hello.go):
 
 ```go
 func Hello(name string, language string) string {
@@ -492,17 +390,17 @@ func greetingPrefix(language string) (prefix string) {
 }
 ```
 
-A few new concepts:
+一些新语法：
 
-* In our function signature we have made a _named return value_ `(prefix string)`.
-* This will create a variable called `prefix` in your function.
-  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""`.
-    * You can return whatever it's set to by just calling `return` rather than `return prefix`.
-  * This will display in the Go Doc for your function so it can make the intent of your code clearer.
-* `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
+1. 在函数`greetingPrefix`的签名中，我们使用了**具名返回值**`(prefix string)`，它会在函数中创建一个叫`prefix`的变量，另外
+	2. 这个变量缺省为“零”值，具体要看类型，`int`整型的话零值就是0，字符串的话零值就是空字符串“”。
+	3. 函数返回时可以简写成`return`，相当于`return pefix`。
+	4. 具名变量会显示在Go Doc中，可更清晰说明代码意图。
+5. `switch`语句中，如果所有`case`语句都不匹配，会走`default`分支。
+6. `greetingPrefix`函数以小写字母打头，根据Go语言中的惯例，公共函数以大写字母打头，私有函数以小写字母打头。`greetingPrefix`是内部私有的，所以小写打头。
 
-## Wrapping up
+
+## 总结
 
 Who knew you could get so much out of `Hello, world`?
 
@@ -510,16 +408,16 @@ By now you should have some understanding of:
 
 ### Some of Go's syntax around
 
-* Writing tests
-* Declaring functions, with arguments and return types
-* `if`, `const` and `switch`
-* Declaring variables and constants
+-   Writing tests
+-   Declaring functions, with arguments and return types
+-   `if`, `const` and `switch`
+-   Declaring variables and constants
 
 ### The TDD process and _why_ the steps are important
 
-* _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
-* Writing the smallest amount of code to make it pass so we know we have working software
-* _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
+-   _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
+-   Writing the smallest amount of code to make it pass so we know we have working software
+-   _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
 
 In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "French")` in small, easy to understand steps.
 

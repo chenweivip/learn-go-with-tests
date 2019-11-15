@@ -4,14 +4,6 @@
   <img src="red-green-blue-gophers-smaller.png" />
 </p>
 
-[Art by Denise](https://twitter.com/deniseyu21)
-
-[![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)](https://travis-ci.org/quii/learn-go-with-tests)
-[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
-
--   Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
--   Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
-
 ## Why
 
 -   Explore the Go language by writing tests
@@ -24,7 +16,7 @@
 ### Go fundamentals
 
 1. [Install Go](install-go.md) - Set up environment for productivity.
-2. [Hello, world](hello-world.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
+2. [Hello, world](hello-world.md) - 声明变量，常量，if/else 语句，switch 语句，编写第一个 go 程序和测试代码。子测试(subtests)语法和闭包。
 3. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 4. [Iteration](iteration.md) - Learn about `for` and benchmarking.
 5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.

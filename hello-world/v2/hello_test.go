@@ -4,9 +4,9 @@ import "testing"
 
 func TestHello(t *testing.T) {
 	got := Hello()
-	want := "Hello, world"
+	expected := "Hello, world"
 
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
+	if got != expected {
+		t.Errorf("got %q expected %q", got, expected)
 	}
 }

@@ -2,10 +2,10 @@ package main
 
 import "fmt"
 
-const spanish = "Spanish"
+const chinese = "Chinese"
 const french = "French"
 const englishHelloPrefix = "Hello, "
-const spanishHelloPrefix = "Hola, "
+const chineseHelloPrefix = "你好, "
 const frenchHelloPrefix = "Bonjour, "
 
 // Hello returns a personalised greeting in a given language
@@ -14,8 +14,8 @@ func Hello(name string, language string) string {
 		name = "World"
 	}
 
-	if language == spanish {
-		return spanishHelloPrefix + name
+	if language == chinese {
+		return chineseHelloPrefix + name
 	}
 
 	if language == french {
