@@ -4,7 +4,7 @@
 
 大家常用Hello, world作为学习新编程语言的第一个例子，本课也不例外。
 
-根据Go语言的惯例，请在如下位置创建目录：`$GOPATH/src/github.com/{your-user-id}/hello`，比方说在波波的机器上，创建的就是：`mkdir -p $GOPATH/src/github.com/bob/hello`。后续章节我们会沿用这个惯例。
+根据Go语言的惯例，请在如下位置创建目录：`$GOPATH/src/github.com/{your-user-id}/hello`，比方说在波波的机器上，创建指令为：`mkdir -p $GOPATH/src/github.com/bob/hello`。后续章节我们会沿用这个惯例。
 
 在hello目录中创建v1版本[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v1/hello.go)文件：
 
@@ -66,7 +66,7 @@ func TestHello(t *testing.T) {
 }
 ```
 
-直接在终端运行`go test`运行测试，这个测试应该可以通过，你尝试修改`expected`的值，故意让测试不通过。
+直接在终端运行`go test`运行测试，这个测试应该可以通过，你可以尝试修改`expected`的值，故意让测试不通过。
 
 **注意**：和其它语言如Java/C不同，Go语言中的每行语句后面是不需要加标点的。
 
@@ -166,7 +166,7 @@ func Hello(name string) string {
 
 ## 新需求
 
-下面我们要再次完善程序，当Hello函数输入我空字符串的时候，我们希望输出"Hello World"，而不是"Hello, "。
+下面我们要再次完善程序，当Hello函数输入为空字符串的时候，我们希望输出"Hello World"，而不是"Hello, "。
 
 我们先写测试：
 
@@ -174,8 +174,8 @@ func Hello(name string) string {
 func TestHello(t *testing.T) {
 
     t.Run("saying hello to people", func(t *testing.T) {
-        got := Hello("Chris")
-        expected := "Hello, Chris"
+        got := Hello("Bobo")
+        expected := "Hello, Bobo"
 
         if got != expected {
             t.Errorf("got %q expected %q", got, expected)
@@ -222,7 +222,7 @@ func TestHello(t *testing.T) {
 
 }
 ```
-上面的代码中，我们把断言逻辑抽取到一个子测试函数`assertCorrectMessage`中，这样可以提升重用度、代码可读和可维护性。Go语言支持在某个函数中再书写子函数，然后在函数中可以调用子函数。我们把参数`t *testing.T`传给`assertCorrectMessage`，这样就可以在子函数中访问测试框架的方法，比如错误输出。
+上面的代码中，我们把断言逻辑抽取到一个子测试函数`assertCorrectMessage`中，这样可以提升重用度、代码可读和可维护性。Go语言支持在某个函数中再书写子函数(也叫闭包函数)，然后在函数中可以调用子函数。我们把参数`t *testing.T`传给`assertCorrectMessage`，这样就可以在子函数中访问测试框架的方法，比如错误输出。
 
 子函数中的`t.Helper()`方法告知测试框架在错误输出时，输出调用`assertCorrectMessage`语句的行号，而不是`assertCorrectMessage`子函数内的行号，这样可以方便开发人员跟踪问题。如果你还不理解`t.Helper()`的作用，可以故意修改测试让它失败，然后分别注释或者不注释`t.Helper()`这句，看看效果体会一下。
 
@@ -244,20 +244,20 @@ func Hello(name string) string {
 
 ### 测试驱动开发的纪律
 
-一个典型的测试驱动开发流程包含如下步骤：
+测试驱动开发(Test Driven Development，简称TDD)，是一种现代敏捷软件开发方法学。一个典型的TDD流程包含如下步骤：
 
 1. 写测试
 2. 写程序逻辑
 3. 运行测试，调整程序逻辑，直到测试通过
 4. 重构(包括程序和测试）
 
-测试驱动开发的核心逻辑是**缩短反馈环**，要点是每次都写少量程序逻辑，通过测试快速获得反馈。这种方法虽然看起来前期要多花一些时间写测试，但是可以提升代码质量和可维护性，中长期可以提升开发效率，尤其在你后续需要重构的时候，已有的测试代码可以保障你快速重构。如果你一开始忽略测试，虽然短期看可以更快更多写代码，但是长期代码不可维护，难于重构。
+TDD的核心逻辑是**缩短反馈环**，要点是每次都写少量程序逻辑，通过测试快速获得反馈。这种方法虽然看起来前期要多花一些时间写测试，但是可以提升代码质量和可维护性，中长期反而可以提升开发效率。尤其在你后续需要重构的时候，已有的测试代码可以保障你快速重构。如果你一开始忽略测试，虽然短期看可以更快更多写代码，但是随着代码越堆越多，长期代码不可维护，难以重构。
 
 **注意**，实际开发中，第1～2步没有严格顺序要求，可以先写测试，再写程序逻辑，也可以倒过来，先写程序逻辑，再写测试，大部分程序员倾向后者。顺序并不重要，重要的是通过测试快速获取反馈。
 
 ## 再来一个新需求
 
-下面再来一个新需求，我们的Hello world程序，除了支持英文，现在要求支持中文，并且缺省支持的是英文。
+下面再来一个新需求，我们的Hello world程序，除了要支持英文(并且缺省支持的是英文)，现在还要求支持中文。
 
 添加一个测试：
 
@@ -340,7 +340,7 @@ func Hello(name string, language string) string {
 
 ## `switch`语句
 
-`if`语句过多，是程序复杂上升和可维护性下降的一个信号，我们可以通过`swich`语句进行重构，`switch`可以提升代码的可维护性和扩展性(假设我们后面要支持更多语言)。
+`if`语句过多，是程序复杂上升和可维护性下降的一个信号，我们可以通过`swich`语句进行重构，`switch`语句可以提升代码的可维护性和扩展性(假设我们后面要支持更多语言)。
 
 
 ```go
@@ -362,7 +362,7 @@ func Hello(name string, language string) string {
 }
 ```
 
-现在，学员应该对测试驱动开发有直观感受了，通过测试驱动开发，既可以保证我们代码的质量，同时可以提升我们的开发效率，当我们要实现新的需求，比如让我们的Hello, world支持一种新语言，我们可以快速开发和交付功能。
+重构完成，再次执行测试，确保通过。现在，学员应该对TDD方法有直观感受了，通过TDD，既可以保证我们代码的质量，同时可以提升我们的开发效率，当我们要实现新的需求，比如让我们的Hello, world支持一种新语言，我们更快速开发和交付功能。
 
 ### 最后一个重构
 
@@ -390,35 +390,28 @@ func greetingPrefix(language string) (prefix string) {
 }
 ```
 
-一些新语法：
+注意这里引入了一些新的Go语言语法：
 
-1. 在函数`greetingPrefix`的签名中，我们使用了**具名返回值**`(prefix string)`，它会在函数中创建一个叫`prefix`的变量，另外
-	2. 这个变量缺省为“零”值，具体要看类型，`int`整型的话零值就是0，字符串的话零值就是空字符串“”。
-	3. 函数返回时可以简写成`return`，相当于`return pefix`。
-	4. 具名变量会显示在Go Doc中，可更清晰说明代码意图。
-5. `switch`语句中，如果所有`case`语句都不匹配，会走`default`分支。
-6. `greetingPrefix`函数以小写字母打头，根据Go语言中的惯例，公共函数以大写字母打头，私有函数以小写字母打头。`greetingPrefix`是内部私有的，所以小写打头。
+1. 在函数`greetingPrefix`的签名中，我们使用了**具名返回值**`(prefix string)`，它会在函数中创建一个叫`prefix`的变量，另外：
+	1. 这个变量缺省为“零”值，具体要看类型，`int`整型的话零值就是0，字符串的话零值就是空字符串“”。
+	2. 函数返回时可以简写成`return`，相当于`return prefix`。
+	3. 具名变量会显示在Go Doc中，可更清晰说明代码意图。
+2. `switch`语句中，如果所有`case`语句都不匹配，就会走`default`分支。
+3. `greetingPrefix`函数以小写字母打头，根据Go语言中的惯例，公共函数以大写字母打头，私有函数以小写字母打头。`greetingPrefix`是内部私有的，所以小写打头。
 
 
 ## 总结
 
-Who knew you could get so much out of `Hello, world`?
+没想到一个小小的`Hello, world`程序和TDD结合，可以衍生出这么多内容！现在你应该要理解和掌握：
 
-By now you should have some understanding of:
+### 一些Go语言语法
 
-### Some of Go's syntax around
+-   如何写测试
+-   声明函数，包括函数参数和返回值
+-   `if`, `const` 和 `switch` 的用法
+-   声明变量和常量
 
--   Writing tests
--   Declaring functions, with arguments and return types
--   `if`, `const` and `switch`
--   Declaring variables and constants
+### TDD流程和重要性
 
-### The TDD process and _why_ the steps are important
+- 记住TDD的核心逻辑是**缩短反馈环**，要点是每次都写少量程序逻辑，通过测试快速获得反馈。短期看，TDD有一点开销，但是长期TDD可以显著提升软件质量和交付效率。TDD是开发人员必备技能。
 
--   _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
--   Writing the smallest amount of code to make it pass so we know we have working software
--   _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
-
-In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "French")` in small, easy to understand steps.
-
-This is of course trivial compared to "real world" software but the principles still stand. TDD is a skill that needs practice to develop but by being able to break problems down into smaller components that you can test you will have a much easier time writing software.

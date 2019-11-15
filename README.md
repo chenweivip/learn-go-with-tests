@@ -13,7 +13,7 @@
 
 ## Table of contents
 
-### Go fundamentals
+### Go 语言基础
 
 1. [Install Go](install-go.md) - Set up environment for productivity.
 2. [Hello, world](hello-world.md) - 声明变量，常量，if/else 语句，switch 语句，编写第一个 go 程序和测试代码。子测试(subtests)语法和闭包。
@@ -33,7 +33,7 @@
 16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
 17. [Maths](math.md) - Use the `math` package to draw an SVG clock
 
-### Build an application
+### 构建应用
 
 Now that you have hopefully digested the _Go Fundamentals_ section you have a solid grounding of a majority of Go's language features and how to do TDD.
 
