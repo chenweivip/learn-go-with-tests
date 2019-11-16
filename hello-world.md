@@ -1,12 +1,12 @@
 # Hello, World
 
-**[本节课所有代码](https://github.com/spring2go/learn-go-with-tests/tree/master/hello-world)**
+**[本章所有代码](https://github.com/spring2go/learn-go-with-tests/tree/master/hello-world)**
 
 大家常用Hello, world作为学习新编程语言的第一个例子，本课也不例外。
 
-根据Go语言的惯例，请在如下位置创建目录：`$GOPATH/src/github.com/{your-user-id}/hello`，比方说在波波的机器上，创建指令为：`mkdir -p $GOPATH/src/github.com/bob/hello`。后续章节我们会沿用这个惯例。
+根据Go语言的惯例，请在如下位置创建目录：`$GOPATH/src/github.com/{your-user-id}/learn-go-with-tests/hello-world`，比方说在波波的机器上，创建指令为：`mkdir -p $GOPATH/src/github.com/spring2go/learn-go-with-tests/hello-world`。后续章节我们会沿用这个惯例。
 
-在hello目录中创建v1版本[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v1/hello.go)文件：
+在hello-world目录中创建v1版本[`hello.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/hello-world/v1/hello.go)文件：
 
 ```go
 package main
@@ -18,7 +18,7 @@ func main() {
 }
 ```
 
-然后运行这个程序，打开一个终端窗口，进入hello目录，运行命令`go run hello.go`，可以看到Hello, world输出。
+然后运行这个程序，打开一个终端窗口，进入hello-world目录，运行命令`go run hello.go`，可以看到Hello, world输出。
 
 
 ## 这个程序是如何工作的？

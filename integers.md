@@ -1,12 +1,10 @@
-# Integers
+# 整数
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/integers)**
+**[本章代码](https://github.com/spring2go/learn-go-with-tests/tree/master/integers)**
 
-Integers work as you would expect. Let's write an add function to try things out. Create a test file called `adder_test.go` and write this code.
+你应该对编程语言的整数操作早有经验，所以我们只需写一个add函数尝试一下。先写测试，创建integers/v1目录，其中创建一个叫[`adder_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/integers/v1/adder_test.go)的测试文件。
 
-**note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
-
-## Write the test first
+## 先写测试
 
 ```go
 package integers
@@ -23,55 +21,15 @@ func TestAdder(t *testing.T) {
 }
 ```
 
-You will notice that we're using `%d` as our format strings rather than `%q`. That's because we want it to print an integer rather than a string.
+注意这里我们用的占位符是`%d`(之前用过`%q`)，这是专门用于对整数进行格式化的占位符。
 
-Also note that we are no longer using the main package, instead we've defined a package named integers, as the name suggests this will group functions for working with integers such as Add.
+注意，本次代码我们只演示整数操作，只需添加简单函数即可，不需要main主入口，也就不需要用main package。我们只需定义一个叫intergers的package，这个包用于组织整数操作/测试相关的代码。
 
-## Try and run the test
+**注意** Go语言中，一个目录里头只能有一个`package`，注意合理组织你的代码文件。[这里](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)有一个关于项目代码组织的参考和建议。
 
-Run the test `go test`
+## 写代码逻辑
 
-Inspect the compilation error
-
-`./adder_test.go:6:9: undefined: Add`
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-Write enough code to satisfy the compiler _and that's all_ - remember we want to check that our tests fail for the correct reason.
-
-```go
-package integers
-
-func Add(x, y int) int {
-    return 0
-}
-```
-
-When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`.
-
-Now run the tests and we should be happy that the test is correctly reporting what is wrong.
-
-`adder_test.go:10: expected '4' but got '0'`
-
-If you have noticed we learnt about _named return value_ in the [last](hello-world.md#one...last...refactor?) section but aren't using the same here. It should generally be used when the meaning of the result isn't clear from context, in our case it's pretty much clear that `Add` function will add the parameters. You can refer [this](https://github.com/golang/go/wiki/CodeReviewComments#named-result-parameters) wiki for more details.
-
-## Write enough code to make it pass
-
-In the strictest sense of TDD we should now write the _minimal amount of code to make the test pass_. A pedantic programmer may do this
-
-```go
-func Add(x, y int) int {
-    return 4
-}
-```
-
-Ah hah! Foiled again, TDD is a sham right?
-
-We could write another test, with some different numbers to force that test to fail but that feels like a game of cat and mouse.
-
-Once we're more familiar with Go's syntax I will introduce a technique called Property Based Testing, which would stop annoying developers and help you find bugs.
-
-For now, let's fix it properly
+同样在integers/v1目录下，添加[`adder.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/integers/v1/adder.go)，下面是整数相加Add函数的定义，很简单：
 
 ```go
 func Add(x, y int) int {
@@ -79,18 +37,21 @@ func Add(x, y int) int {
 }
 ```
 
-If you re-run the tests they should pass.
+注意，在函数参数中，如果几个参数的类型相同，可以简写，例如`(x int, y int)`，可以简写成`(x, y int)。
 
-## Refactor
+另外，这次我们没有使用**具名返回值**，具名返回值常用在返回值的含义不太清楚的场合中，在本例中，Add函数返回值的含义是显而易见的。关于具名返回值的使用建议，可以参考[这个](https://github.com/golang/go/wiki/CodeReviewComments#named-result-parameters)
 
-There's not a lot in the _actual_ code we can really improve on here.
+在integers目录总，运行测试`go test`，确保测试通过。
 
-We explored earlier how by naming the return argument it appears in the documentation but also in most developer's text editors.
+## 重构
 
-This is great because it aids the usability of code you are writing. It is preferable that a user can understand the usage of your code by just looking at the type signature and documentation.
+代码本身比较简单，没有多少需要改进的地方。
 
-You can add documentation to functions with comments, and these will appear in Go Doc just like when you look at the standard library's documentation.
+前面我们讲过，函数的具名返回参数会出现在文档中，同时也会出现在开发人员的文本编辑器中。
 
+这点很有用，因为它可以提升代码的可读性。如果只需看代码中的类型签名和文档，就可以很容易读懂代码，显然对开发人员体验来说，是非常友好的。
+
+可以在函数上添加注释型文档，这些文档会出现在Go Doc中。如果你看Go语言标准库的文档，也是这么来的。
 ```go
 // Add takes two integers and returns the sum of them.
 func Add(x, y int) int {
@@ -98,17 +59,17 @@ func Add(x, y int) int {
 }
 ```
 
-### Examples
+### 样例Examples
 
-If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library.
+现在我们可以更进一步，制作golang语言代码样例[examples](https://blog.golang.org/examples)。你可以看到在golang语言标准库中有很多样例examples。
 
-Often code examples that can be found outside the codebase, such as a readme file often become out of date and incorrect compared to the actual code because they don't get checked.
+样例文档做法很多，比如在代码之外单独写readme文档，但是这种做法文档和代码很容易失去同步，因为开发人员在修改代码时，很容易忘却需要更新文档。
 
-Go examples are executed just like tests so you can be confident examples reflect what the code actually does.
+Go语言的样例文档可以像测试一样执行，所有文档和样例一般不会失去同步。
 
-Examples are compiled \(and optionally executed\) as part of a package's test suite.
+作为包测试族的一部分，样例会被编译(也可以被执行)。
 
-As with typical tests, examples are functions that reside in a package's \_test.go files. Add the following ExampleAdd function to the `adder_test.go` file.
+和典型的测试一样，样例是在package下_test.go文件中的函数。在[`adder_test.go`](https://github.com/quii/learn-go-with-tests/blob/master/integers/v2/adder_test.go)中添加如下ExampleAdd函数：
 
 ```go
 func ExampleAdd() {
@@ -118,11 +79,11 @@ func ExampleAdd() {
 }
 ```
 
-(If your editor doesn't automatically import packages for you, the compilation step will fail because you will be missing `import "fmt"` in `adder_test.go`. It is strongly recommended you research how to have these kind of errors fixed for you automatically in whatever editor you are using.)
+（注意在`adder_test.go`中需要添加`import "fmt"`导入fmt包，否则编译会通不过，强烈建议设置你的编译器，支持自动导入包，具体设置方法每种编译器都不一样，请自行研究。)
 
-If your code changes so that the example is no longer valid, your build will fail.
+如果你修改了代码逻辑，但是样例没有同步修改，那么测试会失败。
 
-Running the package's test suite, we can see the example function is executed with no further arrangement from us:
+现在可以运行package里头的测试族，`go test -v`，注意添加`-v`参数显示测试执行细节，我们可以看到样例函数也被执行了：
 
 ```bash
 $ go test -v
@@ -132,21 +93,23 @@ $ go test -v
 --- PASS: ExampleAdd (0.00s)
 ```
 
-Please note that the example function will not be executed if you remove the comment "//Output: 6". Although the function will be compiled, it won't be executed.
+请注意，如果我们把注释 "//Output: 6"去掉，那么样例函数就不会被执行(虽然编译和测试可以通过)，你可以尝试一下。
 
-By adding this code the example will appear in the documentation inside `godoc`, making your code even more accessible.
+添加样例example之后，它会出现在`godoc`中，提升你的代码用户体验。
 
-To try this out, run `godoc -http=:6060` and navigate to `http://localhost:6060/pkg/`
+可以试一下，运行`godoc -http=:6060`，然后浏览器访问`http://localhost:6060/pkg/`进行查看。
 
-Inside here you'll see a list of all the packages in your `$GOPATH`, so assuming you wrote this code in somewhere like `$GOPATH/src/github.com/{your_id}` you'll be able to find your example documentation.
+在godoc中，你可以看到你本地的`$GOPATH`中的所有包。比方说对于波波的机器，我在`http://localhost:6060/pkg/github.com/spring2go/learn-go-with-tests/integers/v2/`中，可以看到本章样例文档。
 
-If you publish your code with examples to a public URL, you can share the documentation of your code at [godoc.org](https://godoc.org). For example, here is the finalised API for this chapter [https://godoc.org/github.com/quii/learn-go-with-tests/integers/v2](https://godoc.org/github.com/quii/learn-go-with-tests/integers/v2).
+如果你想公开发布你的代码文档，你可以把文档发布在[godoc.org](https://godoc.org)。例如，本章的最终API发布在[https://godoc.org/github.com/quii/learn-go-with-tests/integers/v2](https://godoc.org/github.com/quii/learn-go-with-tests/integers/v2).
 
-## Wrapping up
 
-What we have covered:
 
-* More practice of the TDD workflow
-* Integers, addition
-* Writing better documentation so users of our code can understand its usage quickly
-* Examples of how to use our code, which are checked as part of our tests
+## 总结
+
+本章我们学习到：
+
+* 再次实践TDD流程，
+* 整数相加，
+* 写好文档，让用户更容易读懂你的代码，
+* 如何书写样例Examples文档，它可以作为测试的一部分被执行。
