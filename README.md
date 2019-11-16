@@ -18,7 +18,7 @@
 1. [Install Go](install-go.md) - Set up environment for productivity.
 2. [Hello, world](hello-world.md) - 声明变量，常量，if/else 语句，switch 语句，编写第一个 go 程序和测试代码。子测试(subtests)语法和闭包。
 3. [整数Integers](integers.md) - 进一步学习函数声明语法，学习改进代码文档的新方法。
-4. [Iteration](iteration.md) - Learn about `for` and benchmarking.
+4. [循环](iteration.md) - 学习 `for` 循环和性能比对测试(benchmarking)。
 5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
 6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.

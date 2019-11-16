@@ -1,14 +1,14 @@
-# Iteration
+# 循环
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/for)**
+**[本章代码](https://github.com/quii/learn-go-with-tests/tree/master/for)**
 
-To do stuff repeatedly in Go, you'll need `for`. In Go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
+在Go语言中实现循环，你可以用关键字`for`。Go语言中没有`while`, `do`, `until`这些关键字，你只能用`for`，所谓少即是多，这反而是好事！
 
-Let's write a test for a function that repeats a character 5 times.
+我们要实现一个函数，将某个字符重复5次输出，我们还是从先写测试开始。
 
-There's nothing new so far, so try and write it yourself for practice.
+## 先写测试
 
-## Write the test first
+创建目录for/v1，其中创建测试文件`repeat_test.go`:
 
 ```go
 package iteration
@@ -25,31 +25,11 @@ func TestRepeat(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## 写代码逻辑让测试通过
 
-`./repeat_test.go:6:14: undefined: Repeat`
+`for`的语法我们大都很熟悉，遵循类似C语言的语法。
 
-## Write the minimal amount of code for the test to run and check the failing test output
-
-_Keep the discipline!_ You don't need to know anything new right now to make the test fail properly.
-
-All you need to do right now is enough to make it compile so you can check your test is written well.
-
-```go
-package iteration
-
-func Repeat(character string) string {
-    return ""
-}
-```
-
-Isn't it nice to know you already know enough Go to write tests for some basic problems? This means you can now play with the production code as much as you like and know it's behaving as you'd hope.
-
-`repeat_test.go:10: expected 'aaaaa' but got ''`
-
-## Write enough code to make it pass
-
-The `for` syntax is very unremarkable and follows most C-like languages.
+在for/v1目录中创建代码文件[`repeat.go`](https://github.com/quii/learn-go-with-tests/blob/master/for/v1/repeat.go)。
 
 ```go
 func Repeat(character string) string {
@@ -61,21 +41,21 @@ func Repeat(character string) string {
 }
 ```
 
-Unlike other languages like C, Java, or JavaScript there are no parentheses surrounding the three components of the for statement and the braces { } are always required. You might wonder what is happening in the row
+和其它语言如C/Java/JavaScript不同，Go语言中的`for`语句不需要用括号把三部分(初始值/判断/递增)括起来。并且，循环体的花括号{ }是必须的。下面这句你可能第一次看到：
 
 ```go
     var repeated string
 ```
 
-as we've been using `:=` so far to declare and initializing variables. However, `:=` is simply [short hand for both steps](https://gobyexample.com/variables). Here we are declaring a `string` variable only. Hence, the explicit version. We can also use `var` to declare functions, as we'll see later on.
+之前我们用过 `:=` 可以同时声明和初始化变量。但是 `:=` 只是[同时做声明+初始化的简写](https://gobyexample.com/variables)，因为值的类型可以自动推导出来，所以可以简写。本例中，我们需要声明一个变量，无法自动推导类型，所以我们只能用非简写版本， var和string都不能少。`var` 也可以用来声明函数，这个我们后面会再讲。
 
-Run the test and it should pass.
+现在运行测试，确保可以通过。
 
-Additional variants of the for loop are described [here](https://gobyexample.com/for).
+关于for循环的更多变体，可以参考[这里](https://gobyexample.com/for)。
 
-## Refactor
+## 重构
 
-Now it's time to refactor and introduce another construct `+=` assignment operator.
+我们来对代码进行一点优化，引入一个常量，同时加法操作可以用 `+=` 运算符进行简化，创建v2版本[`repeat.go`](https://github.com/quii/learn-go-with-tests/blob/master/for/v2/repeat.go)：
 
 ```go
 const repeatCount = 5
@@ -89,11 +69,13 @@ func Repeat(character string) string {
 }
 ```
 
-`+=` the Add AND assignment operator, adds the right operand to the left operand and assigns the result to left operand. It works with other types like integers.
+`+=` 是加并且赋值操作符连写，将右边的操作数加到左边的操作数上，然后将值再赋给左边的操作数。这种方式也适用于其它类型，比如整数。
 
-### Benchmarking
+### 性能比对测试Benchmarking
 
-Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is another first-class feature of the language and it is very similar to writing tests.
+Go语言中[内置支持性能比对测试](https://golang.org/pkg/testing/#hdr-Benchmarks)，并且方法和写测试非常类似。
+
+在[`repeat_test.go`](https://github.com/quii/learn-go-with-tests/blob/master/for/vx/repeat_test.go)中添加性能比对测试函数`BenchmarkRepeat`：
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
@@ -103,36 +85,36 @@ func BenchmarkRepeat(b *testing.B) {
 }
 ```
 
-You'll see the code is very similar to a test.
+可以看到这个函数的写法和测试很像。
 
-The `testing.B` gives you access to the cryptically named `b.N`.
+这个函数带一个参数`b *testing.B`，它是一个钩子参数，可以让我们对接性能测试框架，比如函数中我们用到的 `b.N`，可以获取性能测试的循环次数。
 
-When the benchmark code is executed, it runs `b.N` times and measures how long it takes.
+当性能比对测试执行的时候，循环会运行 `b.N` 次，并且测试框架会测量执行时间。
 
-The amount of times the code is run shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
+你无需关心具体执行的次数，测试框架会帮你挑选最优值，保证在恰当的时间内运行足够测试。
 
-To run the benchmarks do `go test -bench=.` (or if you're in Windows Powershell `go test -bench="."`)
+现在运行命令 `go test -bench=.` 执行性能比对测试。(如果你在Windows Powershell终端下，请用`go test -bench="."`)： 
 
 ```text
 goos: darwin
 goarch: amd64
-pkg: github.com/quii/learn-go-with-tests/for/v4
-10000000           136 ns/op
+pkg: github.com/spring2go/learn-go-with-tests/for/vx
+7439353           158 ns/op
 PASS
 ```
 
-What `136 ns/op` means is our function takes on average 136 nanoseconds to run \(on my computer\). Which is pretty ok! To test this it ran it 10000000 times.
+`158 ns/op`的意思是，在我的本地机器上，Repeat函数平均需要花费136纳秒运行。这个性能是OK的！测试框架显示它运行了7439353次，再计算出平均运行时间。
 
-_NOTE_ by default Benchmarks are run sequentially.
+**注意**，缺省情况下，性能比对测试以顺序方式运行。
 
-## Practice exercises
+## 扩展练习
 
-* Change the test so a caller can specify how many times the character is repeated and then fix the code
-* Write `ExampleRepeat` to document your function
-* Have a look through the [strings](https://golang.org/pkg/strings) package. Find functions you think could be useful and experiment with them by writing tests like we have here. Investing time learning the standard library will really pay off over time.
+* 修改Repeat函数，让调用方能够指定重复次数，然后修改代码和测试，并测试通过。
+* 为你的函数添加`ExampleRepeat` 样例作为文档。
+* 过一下[strings](https://golang.org/pkg/strings)标准库。找一两个你感兴趣的函数，然后为这些函数写测试(包括性能比对测试)。在标准库上多花时间学习是很有益的。
 
-## Wrapping up
+## 总结
 
-* More TDD practice
-* Learned `for`
-* Learned how to write benchmarks
+* 进一步实践TDD，
+* 学习 `for` 循环，
+* 学习如何写性能比对测试benchmarks。
