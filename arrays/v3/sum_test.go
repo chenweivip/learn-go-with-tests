@@ -9,10 +9,10 @@ func TestSum(t *testing.T) {
 		numbers := []int{1, 2, 3}
 
 		got := Sum(numbers)
-		want := 6
+		expected := 6
 
-		if got != want {
-			t.Errorf("got %d want %d given, %v", got, want, numbers)
+		if got != expected {
+			t.Errorf("got %d expected %d given, %v", got, expected, numbers)
 		}
 	})
 

@@ -13,7 +13,7 @@ func Sum(numbers []int) int {
 func SumAllTails(numbersToSum ...[]int) []int {
 	var sums []int
 	for _, numbers := range numbersToSum {
-		if len(numbers) == 0 {
+		if len(numbers) == 0 { // fix
 			sums = append(sums, 0)
 		} else {
 			tail := numbers[1:]

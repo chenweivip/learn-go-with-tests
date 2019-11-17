@@ -19,7 +19,7 @@
 2. [Hello, world](hello-world.md) - 声明变量，常量，if/else 语句，switch 语句，编写第一个 go 程序和测试代码。子测试(subtests)语法和闭包。
 3. [整数Integers](integers.md) - 进一步学习函数声明语法，学习改进代码文档的新方法。
 4. [循环](iteration.md) - 学习 `for` 循环和性能比对测试(benchmarking)。
-5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
+5. [数组Array和切片Slices](arrays-and-slices.md) - 学习数组(Array)，切片(Slice)，`len`函数，可变参数(varargs)，`range`函数和测试覆盖率(Test Coverage)。
 6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
 8. [Maps](maps.md) - Learn about storing values in the map data structure.
