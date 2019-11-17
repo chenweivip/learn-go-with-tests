@@ -7,10 +7,10 @@ import (
 func TestPerimeter(t *testing.T) {
 	rectangle := Rectangle{10.0, 10.0}
 	got := Perimeter(rectangle)
-	want := 40.0
+	expected := 40.0
 
-	if got != want {
-		t.Errorf("got %g want %g", got, want)
+	if got != expected {
+		t.Errorf("got %g expected %g", got, expected)
 	}
 }
 
@@ -30,7 +30,7 @@ func TestArea(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.shape.Area()
 			if got != tt.hasArea {
-				t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
+				t.Errorf("%#v got %g expected %g", tt.shape, got, tt.hasArea)
 			}
 		})
 

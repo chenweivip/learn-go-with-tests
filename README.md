@@ -4,12 +4,10 @@
   <img src="red-green-blue-gophers-smaller.png" />
 </p>
 
-## Why
+## 目标
 
--   Explore the Go language by writing tests
--   **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
--   Be confident that you'll be able to start writing robust, well-tested systems in Go
--   [Watch a video, or read about why unit testing and TDD is important](why.md)
+* 掌握Go语言基础
+* 掌握测试驱动方法(TDD)
 
 ## Table of contents
 
@@ -19,8 +17,8 @@
 2. [Hello, world](hello-world.md) - 声明变量，常量，if/else 语句，switch 语句，编写第一个 go 程序和测试代码。子测试(subtests)语法和闭包。
 3. [整数Integers](integers.md) - 进一步学习函数声明语法，学习改进代码文档的新方法。
 4. [循环](iteration.md) - 学习 `for` 循环和性能比对测试(benchmarking)。
-5. [数组Array和切片Slices](arrays-and-slices.md) - 学习数组(Array)，切片(Slice)，`len`函数，可变参数(varargs)，`range`函数和测试覆盖率(Test Coverage)。
-6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
+5. [数组Array和切片Slices](arrays-and-slices.md) - 学习数组(Array)，切片(Slice)，`len`函数，可变数量参数(varargs)，`range`函数和测试覆盖率(Test Coverage)。
+6. [结构体struct、方法method和接口interface](structs-methods-and-interfaces.md) - 学习结构体`struct`, 方法methods, 接口`interface`和表驱动测试.
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
 8. [Maps](maps.md) - Learn about storing values in the map data structure.
 9. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.

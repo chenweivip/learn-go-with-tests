@@ -1,41 +1,31 @@
-# Structs, methods & interfaces
+# 结构体struct、方法method和接口interface
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/structs)**
+**[本章代码](https://github.com/spring2go/learn-go-with-tests/tree/master/structs)**
 
-Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating-point numbers like `123.45`.
+假设有一个需求，给定宽height和高width，计算矩形的周长。我们可以写一个函数`Perimeter(width float64, height float64)`，其中`float64`表示浮点数，例如`123.45`。
 
-The TDD cycle should be pretty familiar to you by now.
+现在你对TDD方法应该很熟悉了。
 
-## Write the test first
+## 先写测试
+
+[shapes_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v1/shapes_test.go)
 
 ```go
 func TestPerimeter(t *testing.T) {
     got := Perimeter(10.0, 10.0)
-    want := 40.0
+    expected := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
+    if got != expected {
+        t.Errorf("got %.2f expected %.2f", got, expected)
     }
 }
 ```
 
-Notice the new format string? The `f` is for our `float64` and the `.2` means print 2 decimal places.
+注意新的字符串格式化占位符，`f`是浮点数占位符，`.2`表示打印两位小数。
 
-## Try to run the test
+## 写课程序代码
 
-`./shapes_test.go:6:9: undefined: Perimeter`
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-```go
-func Perimeter(width float64, height float64) float64 {
-    return 0
-}
-```
-
-Results in `shapes_test.go:10: got 0.00 want 40.00`.
-
-## Write enough code to make it pass
+[shapes.go](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v1/shapes.go)
 
 ```go
 func Perimeter(width float64, height float64) float64 {
@@ -43,33 +33,37 @@ func Perimeter(width float64, height float64) float64 {
 }
 ```
 
-So far, so easy. Now let's create a function called `Area(width, height float64)` which returns the area of a rectangle.
+很简单，对吧。现在我们再创建一个函数`Area(width, height float64)`，它可以返回矩形的面积。
 
-Try to do it yourself, following the TDD cycle.
+你可以尝试先自己来实现，记得遵循TDD方法。
 
-You should end up with tests like this
+测试代码类似如下:
+
+[shapes_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v2/shapes_test.go)
 
 ```go
 func TestPerimeter(t *testing.T) {
     got := Perimeter(10.0, 10.0)
-    want := 40.0
+    expected := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
+    if got != expected {
+        t.Errorf("got %.2f expected %.2f", got, expected)
     }
 }
 
 func TestArea(t *testing.T) {
     got := Area(12.0, 6.0)
-    want := 72.0
+    expected := 72.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
+    if got != expected {
+        t.Errorf("got %.2f expected %.2f", got, expected)
     }
 }
 ```
 
-And code like this
+实现代码如下:
+
+[shapes.go](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v2/shapes.go)
 
 ```go
 func Perimeter(width float64, height float64) float64 {
@@ -81,15 +75,15 @@ func Area(width float64, height float64) float64 {
 }
 ```
 
-## Refactor
+## 重构
 
-Our code does the job, but it doesn't contain anything explicit about rectangles. An unwary developer might try to supply the width and height of a triangle to these functions without realising they will return the wrong answer.
+上面的代码可以实现功能，但是代码本身和矩形没有直接关联。一个粗心的程序员可能会误传入一个三角形的宽度和高度，却没有意识到结果是错误的。
 
-We could just give the functions more specific names like `RectangleArea`. A neater solution is to define our own _type_ called `Rectangle` which encapsulates this concept for us.
+我们可以给函数更明确的名称，例如`RectangleArea`。一种更合理的做法是定义我们自己的`Rectangle`类型，通过这个类型封装矩形这个概念。
 
-We can create a simple type using a **struct**. [A struct](https://golang.org/ref/spec#Struct_types) is just a named collection of fields where you can store data.
+我们可以用**struct**来创建一个简单类型。[struct](https://golang.org/ref/spec#Struct_types)，简单理解，就是包含一组字段的一个结构体，可以用来存数据。
 
-Declare a struct like this
+声明一个`Rectangle`结构体:
 
 ```go
 type Rectangle struct {
@@ -98,41 +92,33 @@ type Rectangle struct {
 }
 ```
 
-Now lets refactor the tests to use `Rectangle` instead of plain `float64`s.
+我们使用`Rectangle`来重构测试:
+
+[`shapes_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v3/shapes_test.go)
 
 ```go
 func TestPerimeter(t *testing.T) {
     rectangle := Rectangle{10.0, 10.0}
     got := Perimeter(rectangle)
-    want := 40.0
+    expected := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
+    if got != expected {
+        t.Errorf("got %.2f expected %.2f", got, expected)
     }
 }
 
 func TestArea(t *testing.T) {
     rectangle := Rectangle{12.0, 6.0}
     got := Area(rectangle)
-    want := 72.0
+    expected := 72.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
+    if got != expected {
+        t.Errorf("got %.2f expected %.2f", got, expected)
     }
 }
 ```
 
-Remember to run your tests before attempting to fix, you should get a helpful error like
-
-```text
-./shapes_test.go:7:18: not enough arguments in call to Perimeter
-    have (Rectangle)
-    want (float64, float64)
-```
-
-You can access the fields of a struct with the syntax of `myStruct.field`.
-
-Change the two functions to fix the test.
+修改程序代码[`shapes.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v3/shapes.go)
 
 ```go
 func Perimeter(rectangle Rectangle) float64 {
@@ -144,11 +130,13 @@ func Area(rectangle Rectangle) float64 {
 }
 ```
 
-I hope you'll agree that passing a `Rectangle` to a function conveys our intent more clearly but there are more benefits of using structs that we will get on to.
+可以通过 `myStruct.field` 语法来访问结构体的字段。
 
-Our next requirement is to write an `Area` function for circles.
+通过给函数传一个`Rectangle`类型的参数，这个函数的作用会更加明确。但实际上还有更合理的做法，可以直接使用结构体struct来实现，我们后面会展开。
 
-## Write the test first
+下一个需求是给圆形写一个`Area`函数。
+
+## 先写测试
 
 ```go
 func TestArea(t *testing.T) {
@@ -156,35 +144,31 @@ func TestArea(t *testing.T) {
     t.Run("rectangles", func(t *testing.T) {
         rectangle := Rectangle{12, 6}
         got := Area(rectangle)
-        want := 72.0
+        expected := 72.0
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
+        if got != expected {
+            t.Errorf("got %g expected %g", got, expected)
         }
     })
 
     t.Run("circles", func(t *testing.T) {
         circle := Circle{10}
         got := Area(circle)
-        want := 314.1592653589793
+        expected := 314.1592653589793
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
+        if got != expected {
+            t.Errorf("got %g expected %g", got, expected)
         }
     })
 
 }
 ```
 
-As you can see, the 'f' has been replaced by 'g', using 'f' it could be difficult to know the exact decimal number, with 'g' we get a complete decimal number in the error message \([fmt options](https://golang.org/pkg/fmt/)\).
+可以看到，格式化占位符`f`可以用`g`替代，用`f`的话难以知道确切的小数位，而`g`可以在错误消息中显示完整的小数位([参考fmt选项](https://golang.org/pkg/fmt/))。
 
-## Try to run the test
+## 写程序代码
 
-`./shapes_test.go:28:13: undefined: Circle`
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-We need to define our `Circle` type.
+我们先定义`Circle`类型结构体:
 
 ```go
 type Circle struct {
@@ -192,35 +176,33 @@ type Circle struct {
 }
 ```
 
-Now try to run the tests again
-
-`./shapes_test.go:29:14: cannot use circle (type Circle) as type Rectangle in argument to Area`
-
-Some programming languages allow you to do something like this:
+然后我们实现计算圆形面积的函数，你可以尝试添加`Area(rectangle Rectangle)`函数:
 
 ```go
 func Area(circle Circle) float64 { ... }
 func Area(rectangle Rectangle) float64 { ... }
 ```
 
-But you cannot in Go
+但是编译不通过，Go语言不允许你在同一块中重复声明`Area`函数:
 
 `./shapes.go:20:32: Area redeclared in this block`
 
-We have two choices:
+有两个办法解决这个问题:
 
-* You can have functions with the same name declared in different _packages_. So we could create our `Area(Circle)` in a new package, but that feels overkill here.
-* We can define [_methods_](https://golang.org/ref/spec#Method_declarations) on our newly defined types instead.
+* 我们可以将同名的函数声明在不同的包package中，但是这样做有点把事情搞复杂了。
+* 我们也可以利用struct类型来定义[方法method](https://golang.org/ref/spec#Method_declarations)。
 
-### What are methods?
+### 什么是方法?
 
-So far we have only been writing _functions_ but we have been using some methods. When we call `t.Errorf` we are calling the method `ErrorF` on the instance of our `t` \(`testing.T`\).
+虽然到目前为止我们只写过函数(function)，但其实我们已经用过一些方法(method)。之前我们调用`t.Errorf`，其实我们是在调用实例`t`(类型为`testing.T`)上的方法`Errorf`。
 
-A method is a function with a receiver. A method declaration binds an identifier, the method name, to a method, and associates the method with the receiver's base type.
+所谓方法，是带接收者(receiver)的一个函数。方法声明将方法名和方法体绑定起来，并且将这个方法关联到接收者的基础类型上。
 
-Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
+方法和函数非常像，但调用方式不同，方法是通过对应实例调用的。你可以在任意地方调用函数，例如`Area(rectangle)`，但你只能在某个"事物"上调用方法。
 
-An example will help so let's change our tests first to call methods instead and then fix the code.
+来看具体例子，我们先修改测试，改为调用方法，后面我们再修改程序代码。
+
+[`shapes_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v4/shapes_test.go)
 
 ```go
 func TestArea(t *testing.T) {
@@ -228,114 +210,90 @@ func TestArea(t *testing.T) {
     t.Run("rectangles", func(t *testing.T) {
         rectangle := Rectangle{12, 6}
         got := rectangle.Area()
-        want := 72.0
+        expected := 72.0
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
+        if got != expected {
+            t.Errorf("got %g expected %g", got, expected)
         }
     })
 
     t.Run("circles", func(t *testing.T) {
         circle := Circle{10}
         got := circle.Area()
-        want := 314.1592653589793
+        expected := 314.1592653589793
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
+        if got != expected {
+            t.Errorf("got %g expected %g", got, expected)
         }
     })
 
 }
 ```
 
-If we try to run the tests, we get
+## 写程序代码
 
-```text
-./shapes_test.go:19:19: rectangle.Area undefined (type Rectangle has no field or method Area)
-./shapes_test.go:29:16: circle.Area undefined (type Circle has no field or method Area)
-```
-
-> type Circle has no field or method Area
-
-I would like to reiterate how great the compiler is here. It is so important to take the time to slowly read the error messages you get, it will help you in the long run.
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-Let's add some methods to our types
+[`shapes.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v4/shapes.go)
 
 ```go
 type Rectangle struct {
-    Width  float64
-    Height float64
+	Width  float64
+	Height float64
 }
 
-func (r Rectangle) Area() float64  {
-    return 0
+func (r Rectangle) Area() float64 {
+	return r.Width * r.Height
+}
+
+func Perimeter(rectangle Rectangle) float64 {
+	return 2 * (rectangle.Width + rectangle.Height)
 }
 
 type Circle struct {
-    Radius float64
+	Radius float64
 }
 
-func (c Circle) Area() float64  {
-    return 0
+func (c Circle) Area() float64 {
+	return math.Pi * c.Radius * c.Radius
 }
 ```
 
-The syntax for declaring methods is almost the same as functions and that's because they're so similar. The only difference is the syntax of the method receiver `func (receiverName RecieverType) MethodName(args)`.
+方法声明的语法和函数很像，主要区别在方法接收者的语法: `func (receiverName RecieverType) MethodName(args)`。
 
-When your method is called on a variable of that type, you get your reference to its data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
+当你调用某种类型的方法，可以通过`receiverName`这个变量获取对当前实例的引用。在很多其它语言(比如Java)中，是通过`this`这个接收者来获取当前实例的引用的。
 
-It is a convention in Go to have the receiver variable be the first letter of the type.
+在Go语言中，接收者变量的命名惯例是使用类型的第一个字母，并且小写。
 
 ```go
 r Rectangle
 ```
 
-If you try to re-run the tests they should now compile and give you some failing output.
+注意，在Circle的`Area`函数中，我们引用了`math`包中的`PI`常量，记得要导入`math`包。
 
-## Write enough code to make it pass
+现在运行测试，确保测试通过。
 
-Now let's make our rectangle tests pass by fixing our new method
 
-```go
-func (r Rectangle) Area() float64  {
-    return r.Width * r.Height
-}
-```
+## 重构
 
-If you re-run the tests the rectangle tests should be passing but circle should still be failing.
+目前测试代码里头有重复，我们的两个测试方法的流程都类似: 创建一个形状实例，然后调用`Area()`方法计算面积，最后比对面积。
 
-To make circle's `Area` function pass we will borrow the `Pi` constant from the `math` package \(remember to import it\).
+我们可以抽取公共测试逻辑`checkArea`，它接收一个形状(Shape)，这个形状可以是`Rectangle`，也可以是`Circle`，只要满足支持计算`Area()`即可。
 
-```go
-func (c Circle) Area() float64  {
-    return math.Pi * c.Radius * c.Radius
-}
-```
+在Go语言中，这个Shape可以用**接口interface**来实现。
 
-## Refactor
+在类似Go这样的静态类型语言中，[接口Interfaces](https://golang.org/ref/spec#Interface_types)是一种非常强大的概念，它允许我们创建一种类似具有范型能力的函数～这类函数可以接收不同的类型作为参数，它让我们可以创建高度解耦的代码，同时继续保持类型安全。
 
-There is some duplication in our tests.
+为了引入接口，我们先重构测试:
 
-All we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result.
-
-We want to be able to write some kind of `checkArea` function that we can pass both `Rectangle`s and `Circle`s to, but fail to compile if we try to pass in something that isn't a shape.
-
-With Go, we can codify this intent with **interfaces**.
-
-[Interfaces](https://golang.org/ref/spec#Interface_types) are a very powerful concept in statically typed languages like Go because they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
-
-Let's introduce this by refactoring our tests.
+[`shapes_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v5/shapes_test.go)
 
 ```go
 func TestArea(t *testing.T) {
 
-    checkArea := func(t *testing.T, shape Shape, want float64) {
+    checkArea := func(t *testing.T, shape Shape, expected float64) {
         t.Helper()
         got := shape.Area()
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
+        if got != expected {
+            t.Errorf("got %g expected %g", got, expected)
         }
     }
 
@@ -352,9 +310,11 @@ func TestArea(t *testing.T) {
 }
 ```
 
-We are creating a helper function like we have in other exercises but this time we are asking for a `Shape` to be passed in. If we try to call this with something that isn't a shape, then it will not compile.
+`checkArea`是我们抽取出来的一个公共测试函数，它要求传入一个`Shape`，如果我们传入的不是一个Shape，那么编译器就会报错。
 
-How does something become a shape? We just tell Go what a `Shape` is using an interface declaration
+这个Shape到底长啥样？在Go语言中，我们只需要定义一个接口声明:
+
+[`shapes.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v5/shapes.go)
 
 ```go
 type Shape interface {
@@ -362,41 +322,43 @@ type Shape interface {
 }
 ```
 
-We're creating a new `type` just like we did with `Rectangle` and `Circle` but this time it is an `interface` rather than a `struct`.
+就像我们之前创建`Rectangle`和`Circle`一样，我们再创建了一个新类型`Shape`，只不过这次我们用的是`interface`，而不是之前的`struct`。
 
-Once you add this to the code, the tests will pass.
+现在运行测试，可以通过。
 
-### Wait, what?
+### 这个接口有点奇怪？
 
-This is quite different to interfaces in most other programming languages. Normally you have to write code to say `My type Foo implements interface Bar`.
+Go语言中的接口和其它语言中的接口很不一样。在其它语言中，你的类型必须显式地实现接口，就像`My type Foo implements interface Bar`这样。
 
-But in our case
+但在我们的案例中:
 
-* `Rectangle` has a method called `Area` that returns a `float64` so it satisfies the `Shape` interface
-* `Circle` has a method called `Area` that returns a `float64` so it satisfies the `Shape` interface
-* `string` does not have such a method, so it doesn't satisfy the interface
-* etc.
+* `Rectangle`有一个称为`Area`的方法，它返回一个`float64`类型的返回值，所以它满足`Shape`接口规范
+* `Circle`也有一个称为`Area`的方法，它也返回一个`float64`类型的返回值，所以它也满足`Shape`接口规范
+* `string`没有称为`Area`的方法，所以它不满足`Shape`接口规范
+* 等等
 
-In Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile.
+在Go语言中，**接口解析是隐式的**。只要你传入的类型满足接口类型规范(具有接口要求的方法)，编译就会通过，它不要求显示声明。
 
-### Decoupling
+### 解耦
 
-Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do its job.
+注意，我们的测试公共函数`checkArea`并不关心传入的是一个`Rectangle` or `Circle` or `Triangle`。通过声明一个接口，这个函数就和具体的类型解耦了，它只需关心具体的操作逻辑。
 
-This kind of approach of using interfaces to declare **only what you need** is very important in software design and will be covered in more detail in later sections.
+接口规范声明支持哪些方法，具体类型只要具备同名方法就满足接口，这种方式在软件设计中非常重要，后续章节我们会讲解更多细节。
 
-## Further refactoring
+## 进一步重构
 
-Now that you have some understanding of structs we can introduce "table driven tests".
+既然我们对struct已经有所理解，我们可以引入"表驱动测试"。
 
-[Table driven tests](https://github.com/golang/go/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
+[表驱动测试(Table Driven Tests)](https://github.com/golang/go/wiki/TableDrivenTests)是一种测试方法，在对一组测试用例进行相同测试的时候，表驱动测试比较有用。
+
+[`shapes_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v6/shapes_test.go)
 
 ```go
 func TestArea(t *testing.T) {
 
     areaTests := []struct {
         shape Shape
-        want  float64
+        expected  float64
     }{
         {Rectangle{12, 6}, 72.0},
         {Circle{10}, 314.1592653589793},
@@ -404,34 +366,36 @@ func TestArea(t *testing.T) {
 
     for _, tt := range areaTests {
         got := tt.shape.Area()
-        if got != tt.want {
-            t.Errorf("got %g want %g", got, tt.want)
+        if got != tt.expected {
+            t.Errorf("got %g expected %g", got, tt.expected)
         }
     }
 
 }
 ```
 
-The only new syntax here is creating an "anonymous struct", areaTests. We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the slice with cases.
+在上面的测试中，我们声明了一个结构体切片(a slice of structs)，这个结构体是一个**匿名结构体**，具有两个字段，`shape`和`expected`，然后我们创建一个`Rectangle`和一个`Circle`，作为测试用例填充到切片中，最后将切片赋值给`areaTests`变量。
 
-We then iterate over them just like we do any other slice, using the struct fields to run our tests.
+然后我们对`areaTests`切片进行迭代，使用结构体上的字段运行测试。
 
-You can see how it would be very easy for a developer to introduce a new shape, implement `Area` and then add it to the test cases. In addition, if a bug is found with `Area` it is very easy to add a new test case to exercise it before fixing it.
+采用这种做法，开发人员只需要添加一个新的Shape结构体类型，实现`Area`方法，然后创建对应实例并添加到测试切片列表中，就可以进行测试。
 
-Table based tests can be a great item in your toolbox but be sure that you have a need for the extra noise in the tests. If you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing then they are a great fit.
+表驱动测试是一种有用的测试方法，但是开发起开需要一些额外的投入。如果你需要对某个接口的不同实现进行测试，那么表驱动测试是一种比较合适的方法。
 
-Let's demonstrate all this by adding another shape and testing it; a triangle.
+我们再添加一个形状~三角形(triangle)，来演示表驱动测试。
 
-## Write the test first
+## 先写测试
 
-Adding a new test for our new shape is very easy. Just add `{Triangle{12, 6}, 36.0},` to our list.
+为我们的新形状添加一个测试很简单，只需在测试列表中添加 `{Triangle{12, 6}, 36.0},`。
+
+[`shapes_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v7/shapes_test.go)
 
 ```go
 func TestArea(t *testing.T) {
 
     areaTests := []struct {
         shape Shape
-        want  float64
+        expected  float64
     }{
         {Rectangle{12, 6}, 72.0},
         {Circle{10}, 314.1592653589793},
@@ -440,65 +404,40 @@ func TestArea(t *testing.T) {
 
     for _, tt := range areaTests {
         got := tt.shape.Area()
-        if got != tt.want {
-            t.Errorf("got %g want %g", got, tt.want)
+        if got != tt.expected {
+            t.Errorf("got %g expected %g", got, tt.expected)
         }
     }
 
 }
 ```
 
-## Try to run the test
+## 添加程序逻辑
 
-Remember, keep trying to run the test and let the compiler guide you toward a solution.
+新建三角形Triangle结构体:
 
-## Write the minimal amount of code for the test to run and check the failing test output
-
-`./shapes_test.go:25:4: undefined: Triangle`
-
-We have not defined Triangle yet
+[`shapes.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v7/shapes.go)
 
 ```go
 type Triangle struct {
     Base   float64
     Height float64
 }
-```
 
-Try again
-
-```text
-./shapes_test.go:25:8: cannot use Triangle literal (type Triangle) as type Shape in field value:
-    Triangle does not implement Shape (missing Area method)
-```
-
-It's telling us we cannot use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
-
-```go
-func (t Triangle) Area() float64 {
-    return 0
-}
-```
-
-Finally the code compiles and we get our error
-
-`shapes_test.go:31: got 0.00 want 36.00`
-
-## Write enough code to make it pass
-
-```go
 func (t Triangle) Area() float64 {
     return (t.Base * t.Height) * 0.5
 }
 ```
 
-And our tests pass!
+注意，Triangle结构体必须具备`Area()`方法，并且返回值类型是`float64`，这样才能满足`Shape`接口规范要求，否则编译通不过。
 
-## Refactor
+运行测试，校验通过。
 
-Again, the implementation is fine but our tests could do with some improvement.
+## 重构
 
-When you scan this
+到目前为止，我们的代码实现是可以的，但是测试方面还可以再提升。
+
+看一下下面的代码:
 
 ```go
 {Rectangle{12, 6}, 72.0},
@@ -506,49 +445,56 @@ When you scan this
 {Triangle{12, 6}, 36.0},
 ```
 
-It's not immediately clear what all the numbers represent and you should be aiming for your tests to be easily understood.
+这几行代码的可读性不佳，含义并不明显，或者说不太容易理解。
 
-So far you've only been shown syntax for creating instances of structs `MyStruct{val1, val2}` but you can optionally name the fields.
+之前我们通过`MyStruct{val1, val2}`方式创建实例，但实际上你还可以命名字段。
 
-Let's see what it looks like
+再看下面的重构后的代码:
 
 ```go
-        {shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
-        {shape: Circle{Radius: 10}, want: 314.1592653589793},
-        {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
+        {shape: Rectangle{Width: 12, Height: 6}, expected: 72.0},
+        {shape: Circle{Radius: 10}, expected: 314.1592653589793},
+        {shape: Triangle{Base: 12, Height: 6}, expected: 36.0},
 ```
 
 In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refactors some tests to a point and asserts:
 
+在[Test-Driven Development by Example](https://g.co/kgs/yCzDLF)这本书中，Kent Beck在重构完一些测试代码后指出:
+
 > The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
+> 
+> 测试应当浅显易懂，看上去就是断言一些易懂的事实，而不是系列难理解的操作
 
-\(emphasis mine\)
 
-Now our tests \(at least the list of cases\) make assertions of truth about shapes and their areas.
+显然，重构后的代码更浅显易懂。
 
-## Make sure your test output is helpful
+## 让测试输出更有意义
 
-Remember earlier when we were implementing `Triangle` and we had the failing test? It printed `shapes_test.go:31: got 0.00 want 36.00`.
+之前对`Triangle`的测试，如果`Area`函数逻辑不正确，那么错误输出可能类似如下:
+`shapes_test.go:31: got 0.00 expected 36.00`.
 
-We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table? How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
+我们知道这个错误和`Triangle`有关，那是因为我们正好在测它。但是如果我们的测试用例很多(比如超过20个)，然后其中一个有bug，如果错误输出不够明确的话，开发人员如何知道具体是哪个用例失败了呢？这个也是开发者体验问题，他们可能需要反复翻看代码才能具体定位哪个用例出错了。
 
-We can change our error message into `%#v got %.2f want %.2f`. The `%#v` format string will print out our struct with the values in its field, so the developer can see at a glance the properties that are being tested.
+我们可以把错误消息格式化字符串改为`%#v got %.2f expected %.2f`。`%#v`格式化字符串会把相关结构体及其字段都打印出来，这样开发人员就比较容易查看和定位问题。
 
-To increase the readability of our test cases further we can rename the `want` field into something more descriptive like `hasArea`.
+为了进一步提升测试代码的可读性，我们可以把`expected`字段命名为更具描述性的字段如`hasArea`。
 
-One final tip with table driven tests is to use `t.Run` and to name the test cases.
+关于表驱动测试的最后一个技巧是使用 `t.Run`，并给测试用例命名。
 
-By wrapping each case in a `t.Run` you will have clearer test output on failures as it will print the name of the case
+通过将每个用例包裹在`t.Run`方法中，那么测试失败时会输出更清晰的错误消息，因为它会打印出用例名称，例如:
+
 
 ```text
 --- FAIL: TestArea (0.00s)
     --- FAIL: TestArea/Rectangle (0.00s)
-        shapes_test.go:33: main.Rectangle{Width:12, Height:6} got 72.00 want 72.10
+        shapes_test.go:33: main.Rectangle{Width:12, Height:6} got 72.00 expected 72.10
 ```
 
-And you can run specific tests within your table with `go test -run TestArea/Rectangle`.
+并且你还可以指定运行表中的某个用例 `go test -run TestArea/Rectangle`。
 
-Here is our final test code which captures this
+以下是重构后的最终测试代码:
+
+[`shapes_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/structs/v8/shapes_test.go)
 
 ```go
 func TestArea(t *testing.T) {
@@ -568,7 +514,7 @@ func TestArea(t *testing.T) {
         t.Run(tt.name, func(t *testing.T) {
             got := tt.shape.Area()
             if got != tt.hasArea {
-                t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
+                t.Errorf("%#v got %g expected %g", tt.shape, got, tt.hasArea)
             }
         })
 
@@ -577,17 +523,17 @@ func TestArea(t *testing.T) {
 }
 ```
 
-## Wrapping up
+## 总结
 
-This was more TDD practice, iterating over our solutions to basic mathematic problems and learning new language features motivated by our tests.
+我们接触了更多的TDD实践，通过对基本的几何图形计算的改进，我们逐步了学习新的语言功能:
 
-* Declaring structs to create your own data types which lets you bundle related data together and make the intent of your code clearer
-* Declaring interfaces so you can define functions that can be used by different types \([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
-* Adding methods so you can add functionality to your data types and so you can implement interfaces
-* Table based tests to make your assertions clearer and your suites easier to extend & maintain
+* 通过结构体struct来创建你自己的数据类型，它可以把一组相关数据包装起来，让你的代码意图更清晰
+* 通过接口interfact，可以让函数接受遵循同一接口规范的不同类型作为输入\(参考[参数多态化parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
+* 在数据类型上，可以添加方法来为类型添加功能，这些方法可以遵循某个接口规范
+* 表驱动测试让你的测试断言更清晰，也让你的测试族更易于扩展和维护
 
-This was an important chapter because we are now starting to define our own types. In statically typed languages like Go, being able to design your own types is essential for building software that is easy to understand, to piece together and to test.
+**本章比较重要**，因为我们开始定义自己的类型了。在像Go这样的静态语言中，能够定制自己的类型是非常重要的，它让我们能够创建更大更复杂的软件系统，并且代码易于理解，模块化和测试。
 
-Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for it's area.
+接口是一种强大的解耦机制，让我们可以隔离和隐藏复杂性。在我们之前的公共测试函数中，测试代码并不需要确切知道传入的具体是哪种Shape类型，只需要能够调用实例的`Area`方法就可以了。
 
-As you become more familiar with Go you start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types you can very quickly re-use a lot of great functionality.
+随着你对Go语言越来越熟悉，你会逐渐体会Go语言接口和标准库的强大能力。你会看到，标准库中大量定义和使用接口，通过让你的类型也实现标准库的接口，你就可以很快重用标准库的大量功能。
