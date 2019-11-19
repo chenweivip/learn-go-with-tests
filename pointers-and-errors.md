@@ -1,4 +1,4 @@
-# 指针(Point)和错误(Error)
+# 指针(Pointer)和错误(Error)
 
 **[本章代码](https://github.com/spring2go/learn-go-with-tests/tree/master/pointers)**
 

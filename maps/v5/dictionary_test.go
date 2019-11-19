@@ -80,6 +80,6 @@ func assertDefinition(t *testing.T, dictionary Dictionary, word, definition stri
 	}
 
 	if definition != got {
-		t.Errorf("got %q want %q", got, definition)
+		t.Errorf("got %q expected %q", got, definition)
 	}
 }

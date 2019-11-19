@@ -1,16 +1,16 @@
-# Maps
+# 字典Maps
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/maps)**
+**[本章代码](https://github.com/spring2go/learn-go-with-tests/tree/master/maps)**
 
-In [arrays & slices](arrays-and-slices.md), you saw how to store values in order. Now, we will look at a way to store items by a `key` and look them up quickly.
+在[数组和切片](arrays-and-slices.md)章节，我们学习了如何顺序存储数据。现在，我们来学习如何通过键`key`来存储数据，然后快速查找数据。
 
-Maps allow you to store items in a manner similar to a dictionary. You can think of the `key` as the word and the `value` as the definition. And what better way is there to learn about Maps than to build our own dictionary?
+Map这种数据类型和字典类似，它支持以key/value对方式存取数据。你可以把`key`看成是字典里头的字(或词)，`value`可以看成是字典里头的对字(或词)的定义。下面我们将实际动手创建Map这种数据结构，来进一步学习它。
 
-First, assuming we already have some words with their definitions in the dictionary, if we search for a word, it should return the definition of it.
+首先，假设我们的字典里头已经存在一些字和对应的定义，如果我们按字搜索，字典就会返回对应的定义。
 
-## Write the test first
+## 先写测试
 
-In `dictionary_test.go`
+`dictionary_test.go`
 
 ```go
 package main
@@ -21,43 +21,25 @@ func TestSearch(t *testing.T) {
     dictionary := map[string]string{"test": "this is just a test"}
 
     got := Search(dictionary, "test")
-    want := "this is just a test"
+    expected := "this is just a test"
 
-    if got != want {
-        t.Errorf("got %q want %q given, %q", got, want, "test")
+    if got != expected {
+        t.Errorf("got %q expected %q given, %q", got, expected, "test")
     }
 }
 ```
 
-Declaring a Map is somewhat similar to an array. Except, it starts with the `map` keyword and requires two types. The first is the key type, which is written inside the `[]`. The second is the value type, which goes right after the `[]`.
+声明字典的方式和声明数组有点类似，只不过字典是以`map`关键字开始声明，并且需要两个类型。第一个是键的类型，这个键key写在方括号`[]`中。第二个是值的类型，写在方括号之后。
 
-The key type is special. It can only be a comparable type because without the ability to tell if 2 keys are equal, we have no way to ensure that we are getting the correct value. Comparable types are explained in depth in the [language spec](https://golang.org/ref/spec#Comparison_operators).
+键的类型比较特殊，它只能是可以比较的类型，显然，如果无法比较两个key是否相等，我们就无法确保获得正确的值。可比较类型在[语言规范](https://golang.org/ref/spec#Comparison_operators)中有详细解释。
 
-The value type, on the other hand, can be any type you want. It can even be another map.
+而值value可以是任意类型，甚至可以是另一个map。
 
-Everything else in this test should be familiar.
+测试中的其它部分你应该已经熟悉了。
 
-## Try to run the test
+## 写程序逻辑
 
-By running `go test` the compiler will fail with `./dictionary_test.go:8:9: undefined: Search`.
-
-## Write the minimal amount of code for the test to run and check the output
-
-In `dictionary.go`
-
-```go
-package main
-
-func Search(dictionary map[string]string, word string) string {
-    return ""
-}
-```
-
-Your test should now fail with a *clear error message*
-
-`dictionary_test.go:12: got '' want 'this is just a test' given, 'test'`.
-
-## Write enough code to make it pass
+`dictionary.go`
 
 ```go
 func Search(dictionary map[string]string, word string) string {
@@ -65,53 +47,54 @@ func Search(dictionary map[string]string, word string) string {
 }
 ```
 
-Getting a value out of a Map is the same as getting a value out of Array `map[key]`.
+从字典中获取值的语法`map[key]`。
 
-## Refactor
+## 重构
 
 ```go
 func TestSearch(t *testing.T) {
     dictionary := map[string]string{"test": "this is just a test"}
 
     got := Search(dictionary, "test")
-    want := "this is just a test"
+    expected := "this is just a test"
 
-    assertStrings(t, got, want)
+    assertStrings(t, got, expected)
 }
 
-func assertStrings(t *testing.T, got, want string) {
+func assertStrings(t *testing.T, got, expected string) {
     t.Helper()
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
+    if got != expected {
+        t.Errorf("got %q expected %q", got, expected)
     }
 }
 ```
 
-I decided to create an `assertStrings` helper to make the implementation more general.
+我把`assertStrings`助手函数抽取出来，让测试更清晰。
 
-### Using a custom type
+### 使用一个定制类型
 
 We can improve our dictionary's usage by creating a new type around map and making `Search` a method.
+我们可以用类型别名改进代码，在map基础上创建一个新类型，然后在新类型上添加`Search`方法。
 
-In `dictionary_test.go`:
+在[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v1/dictionary_test.go)文件中:
 
 ```go
 func TestSearch(t *testing.T) {
     dictionary := Dictionary{"test": "this is just a test"}
 
     got := dictionary.Search("test")
-    want := "this is just a test"
+    expected := "this is just a test"
 
-    assertStrings(t, got, want)
+    assertStrings(t, got, expected)
 }
 ```
 
-We started using the `Dictionary` type, which we have not defined yet. Then called `Search` on the `Dictionary` instance.
+上面的测试中我们用了`Dictionary`类型，然后在这个类型的实例`dictionary`上调用了`Search`方法。`assertStrings`无需变化。
 
-We did not need to change `assertStrings`.
+下面我们来定义`Dictionary`类型。
 
-In `dictionary.go`:
+在[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v1/dictionary.go)文件中:
 
 ```go
 type Dictionary map[string]string
@@ -121,13 +104,14 @@ func (d Dictionary) Search(word string) string {
 }
 ```
 
-Here we created a `Dictionary` type which acts as a thin wrapper around `map`. With the custom type defined, we can create the `Search` method.
+我们创建了一个`Dictionary`类型，它实际上是`map`的一个封装类型。有了定制类型以后，我们就可以创建`Search`方法。
 
-## Write the test first
+## 先写测试
 
-The basic search was very easy to implement, but what will happen if we supply a word that's not in our dictionary?
+对字典的基本查找很容易实现，但是如果查找的字在字典中不存在会怎样？我们应该什么也拿不到。这是OK的，程序可以继续运行，但是还有一个更好的做法 ～ 函数可以明确报告该字在字典中不存在，这样，用户不至于疑惑。
 
-We actually get nothing back. This is good because the program can continue to run, but there is a better approach. The function can report that the word is not in the dictionary. This way, the user isn't left wondering if the word doesn't exist or if there is just no definition (this might not seem very useful for a dictionary. However, it's a scenario that could be key in other usecases).
+我们先写测试:
+
 
 ```go
 func TestSearch(t *testing.T) {
@@ -135,49 +119,29 @@ func TestSearch(t *testing.T) {
 
     t.Run("known word", func(t *testing.T) {
         got, _ := dictionary.Search("test")
-        want := "this is just a test"
+        expected := "this is just a test"
 
-        assertStrings(t, got, want)
+        assertStrings(t, got, expected)
     })
 
     t.Run("unknown word", func(t *testing.T) {
         _, err := dictionary.Search("unknown")
-        want := "could not find the word you were looking for"
+        expected := "could not find the word you were looking for"
 
         if err == nil {
             t.Fatal("expected to get an error.")
         }
 
-        assertStrings(t, err.Error(), want)
+        assertStrings(t, err.Error(), expected)
     })
 }
 ```
 
-The way to handle this scenario in Go is to return a second argument which is an `Error` type.
+Go语言中处理这种场景的方式，就是返回第二个类型为`Error`的返回值。
 
-`Error`s can be converted to a string with the `.Error()` method, which we do when passing it to the assertion. We are also protecting `assertStrings` with `if` to ensure we don't call `.Error()` on `nil`.
+通过调用`Error`实例的`.Error()`方法，`Error`可以被转换成一个字符串，我们在断言中就是这样转的。我们也对`assertStrings`加了一个`if`判断作为保护，确保我们不会在`nil`上调用`.Error()`。
 
-## Try and run the test
-
-This does not compile
-
-```
-./dictionary_test.go:18:10: assignment mismatch: 2 variables but 1 values
-```
-
-## Write the minimal amount of code for the test to run and check the output
-
-```go
-func (d Dictionary) Search(word string) (string, error) {
-    return d[word], nil
-}
-```
-
-Your test should now fail with a much clearer error message.
-
-`dictionary_test.go:22: expected to get an error.`
-
-## Write enough code to make it pass
+## 写程序逻辑
 
 ```go
 func (d Dictionary) Search(word string) (string, error) {
@@ -190,11 +154,11 @@ func (d Dictionary) Search(word string) (string, error) {
 }
 ```
 
-In order to make this pass, we are using an interesting property of the map lookup. It can return 2 values. The second value is a boolean which indicates if the key was found successfully.
+为了让测试通过，我们使用了map的一种特别的查找语法，它可以返回2个值。第二个值是一个布尔值，表明对应的键是否存在。这样，我们就可以区分某个键是不存在，还是没有对应的定义。
 
-This property allows us to differentiate between a word that doesn't exist and a word that just doesn't have a definition.
+## 重构
 
-## Refactor
+[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v2/dictionary.go)
 
 ```go
 var ErrNotFound = errors.New("could not find the word you were looking for")
@@ -209,7 +173,9 @@ func (d Dictionary) Search(word string) (string, error) {
 }
 ```
 
-We can get rid of the magic error in our `Search` function by extracting it into a variable. This will also allow us to have a better test.
+通过把error抽取为一个常量，我们的测试代码会变得更清晰。
+
+[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v2/dictionary_test.go)
 
 ```go
 t.Run("unknown word", func(t *testing.T) {
@@ -219,60 +185,47 @@ t.Run("unknown word", func(t *testing.T) {
 })
 }
 
-func assertError(t *testing.T, got, want error) {
+func assertError(t *testing.T, got, expected error) {
     t.Helper()
 
     if got == nil {
         t.Fatal("expected to get an error.")
     }
     
-    if got != want {
-        t.Errorf("got error %q want %q", got, want)
+    if got != expected {
+        t.Errorf("got error %q expected %q", got, expected)
     }
 }
 ```
 
-By creating a new helper we were able to simplify our test, and start using our `ErrNotFound` variable so our test doesn't fail if we change the error text in the future.
+再重构下测试代码，把`assertError`抽取出来，这样可以简化测试。通过重用`ErrNotFound`变量，我们的测试代码可维护性增强了(后续修改错误消息只需集中修改一个地方)。
 
-## Write the test first
+## 先写测试
 
-We have a great way to search the dictionary. However, we have no way to add new words to our dictionary.
+我们已经可以搜索字典了，但我们还需要支持向字典添加新字。
 
 ```go
 func TestAdd(t *testing.T) {
     dictionary := Dictionary{}
     dictionary.Add("test", "this is just a test")
 
-    want := "this is just a test"
+    expected := "this is just a test"
     got, err := dictionary.Search("test")
     if err != nil {
         t.Fatal("should find added word:", err)
     }
 
-    if want != got {
-        t.Errorf("got %q want %q", got, want)
+    if expected != got {
+        t.Errorf("got %q expected %q", got, expected)
     }
 }
 ```
 
-In this test, we are utilizing our `Search` function to make the validation of the dictionary a little easier.
+先添加新字和定义，然后查找，再断言。
 
-## Write the minimal amount of code for the test to run and check output
+## 编写代码逻辑
 
-In `dictionary.go`
-
-```go
-func (d Dictionary) Add(word, definition string) {
-}
-```
-
-Your test should now fail
-
-```
-dictionary_test.go:31: should find added word: could not find the word you were looking for
-```
-
-## Write enough code to make it pass
+[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v3/dictionary.go)
 
 ```go
 func (d Dictionary) Add(word, definition string) {
@@ -282,21 +235,20 @@ func (d Dictionary) Add(word, definition string) {
 
 Adding to a map is also similar to an array. You just need to specify a key and set it equal to a value.
 
-### Reference Types
+### 引用类型
 
-An interesting property of maps is that you can modify them without passing them as a pointer. This is because `map` is a reference type. Meaning it holds a reference to the underlying data structure, much like a pointer. The underlying data structure is a `hash table`, or `hash map`, and you can read more about `hash tables` [here](https://en.wikipedia.org/wiki/Hash_table).
+字典的一个特性是你可以直接修改它们，而无需传递指针。**因为`map`是引用类型** ～ 它对底层数据结构有一个引用，非常像一个指针。底层数据结构是一个哈希表，关于哈希表，可以参考[这里](https://en.wikipedia.org/wiki/Hash_table)。
 
-Maps being a reference is really good, because no matter how big a map gets there will only be one copy.
+字典属于引用类型非常有用，因为不管字典长多大，它始终只有一份拷贝。
 
-A gotcha that reference types introduce is that maps can be a `nil` value. A `nil` map behaves like an empty map when reading, but attempts to write to a `nil` map will cause a runtime panic. You can read more about maps [here](https://blog.golang.org/go-maps-in-action).
+关于引用类型要注意的一点是，字典可能为`nil`。当试图读取的时候，`nil`字典的行为和空字典是一样的，但是如果试图写入一个`nil`字典，那么程序会抛**runtime panic**。关于字典的更多信息，可以参考[这里](https://blog.golang.org/go-maps-in-action)。
 
-Therefore, you should never initialize an empty map variable:
+因此，你不应该以如下方式初始化一个空字典变量:
 
 ```go
 var m map[string]string
 ```
-
-Instead, you can initialize an empty map like we were doing above, or use the `make` keyword to create a map for you:
+而是应该用下面的方式，或者使用`make`关键字初始化空字典:
 
 ```go
 var dictionary = map[string]string{}
@@ -306,11 +258,13 @@ var dictionary = map[string]string{}
 var dictionary = make(map[string]string)
 ```
 
-Both approaches create an empty `hash map` and point `dictionary` at it. Which ensures that you will never get a runtime panic.
+上面两种方法都可以创建空字典(和指向空字典的指针)，这两种初始化方法可以确保不会产生**runtime panic**。
 
-## Refactor
+## 重构
 
-There isn't much to refactor in our implementation but the test could use a little simplification.
+[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v3/dictionary_test.go)
+
+代码无需重构，但是测试可以再简化一下。
 
 ```go
 func TestAdd(t *testing.T) {
@@ -332,18 +286,20 @@ func assertDefinition(t *testing.T, dictionary Dictionary, word, definition stri
     }
 
     if definition != got {
-        t.Errorf("got %q want %q", got, definition)
+        t.Errorf("got %q expected %q", got, definition)
     }
 }
 ```
 
-We made variables for word and definition, and moved the definition assertion into its own helper function.
+我们为`word`和`definition`创建了变量，并且把对definition的断言移到了助手函数中。
 
-Our `Add` is looking good. Except, we didn't consider what happens when the value we are trying to add already exists!
+我们的`Add`方法看起来可以了。但是，我们还没有考虑试图添加已经存在的键的情况！
 
-Map will not throw an error if the value already exists. Instead, they will go ahead and overwrite the value with the newly provided value. This can be convenient in practice, but makes our function name less than accurate. `Add` should not modify existing values. It should only add new words to our dictionary.
+如果键已经存在，向字典添加重复键不会抛错，它只会用新值覆盖现有的值。实践中这一行为是蛮方便的，但让我们的函数名变得意义不明确 ～ `Add`不应该修改现有的值，它应该只向字典添加新的键值对。
 
-## Write the test first
+## 先写测试
+
+[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v4/dictionary_test.go)
 
 ```go
 func TestAdd(t *testing.T) {
@@ -372,18 +328,9 @@ func TestAdd(t *testing.T) {
 
 For this test, we modified `Add` to return an error, which we are validating against a new error variable, `ErrWordExists`. We also modified the previous test to check for a `nil` error.
 
-## Try to run test
+为了让这个测试通过，我们需要修改`Add`方法返回一个错误，然后在测试中，将错误和一个新的错误变量`ErrWordExists`进行比对。之前的测试我们也修改了一下，检查err是`nil`。
 
-The compiler will fail because we are not returning a value for `Add`.
-
-```
-./dictionary_test.go:30:13: dictionary.Add(word, definition) used as value
-./dictionary_test.go:41:13: dictionary.Add(word, "new test") used as value
-```
-
-## Write the minimal amount of code for the test to run and check the output
-
-In `dictionary.go`
+## 写代码逻辑
 
 ```go
 var (
@@ -391,22 +338,6 @@ var (
     ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
-func (d Dictionary) Add(word, definition string) error {
-    d[word] = definition
-    return nil
-}
-```
-
-Now we get two more errors. We are still modifying the value, and returning a `nil` error.
-
-```
-dictionary_test.go:43: got error '%!s(<nil>)' want 'cannot add word because it already exists'
-dictionary_test.go:44: got 'new test' want 'this is just a test'
-```
-
-## Write enough code to make it pass
-
-```go
 func (d Dictionary) Add(word, definition string) error {
     _, err := d.Search(word)
 
@@ -423,11 +354,13 @@ func (d Dictionary) Add(word, definition string) error {
 }
 ```
 
-Here we are using a `switch` statement to match on the error. Having a `switch` like this provides an extra safety net, in case `Search` returns an error other than `ErrNotFound`.
+这里我们用了`switch`语句来匹配错误，如果`Search`返回一个除`ErrNotFound`以外的错误，`switch`语句提供了额外的检查和返回，这样更简洁安全。
 
-## Refactor
+## 重构
 
-We don't have too much to refactor, but as our error usage grows we can make a few modifications.
+没有太多需要重构，但是因为用了几个error，我们可以做些小修改。
+
+[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v4/dictionary.go)
 
 ```go
 const (
@@ -442,11 +375,13 @@ func (e DictionaryErr) Error() string {
 }
 ```
 
-We made the errors constant; this required us to create our own `DictionaryErr` type which implements the `error` interface. You can read more about the details in [this excellent article by Dave Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it makes the errors more reusable and immutable.
+我们把errors改成了常量，这要求我们创建定制的`DictionaryErr`类型，这个类型要实现`error`接口。关于这种用法的细节，[Dave Cheney](https://dave.cheney.net/2016/04/07/constant-errors)写了一篇很不错的文章。简单讲，它让错误变得可重用，并且是不可变的(immutable)。
 
-Next, let's create a function to `Update` the definition of a word.
+下一步，我们来创建一个`Update`方法，可以更新字典中字的定义。
 
-## Write the test first
+## 先写测试
+
+[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v5/dictionary_test.go)
 
 ```go
 func TestUpdate(t *testing.T) {
@@ -463,29 +398,11 @@ func TestUpdate(t *testing.T) {
 
 `Update` is very closely related to `Add` and will be our next implementation.
 
-## Try and run the test
+`Update`和`Add`类似，我们马上来实现。
 
-```
-./dictionary_test.go:53:2: dictionary.Update undefined (type Dictionary has no field or method Update)
-```
+## 写程序逻辑
 
-## Write minimal amount of code for the test to run and check the failing test output
-
-We already know how to deal with an error like this. We need to define our function.
-
-```go
-func (d Dictionary) Update(word, definition string) {}
-```
-
-With that in place, we are able to see that we need to change the definition of the word.
-
-```
-dictionary_test.go:55: got 'this is just a test' want 'new definition'
-```
-
-## Write enough code to make it pass
-
-We already saw how to do this when we fixed the issue with `Add`. So let's implement something really similar to `Add`.
+[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v5/dictionary.go)
 
 ```go
 func (d Dictionary) Update(word, definition string) {
@@ -493,9 +410,11 @@ func (d Dictionary) Update(word, definition string) {
 }
 ```
 
-There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with `Add`. If we pass in a new word, `Update` will add it to the dictionary.
+代码很少，但是我们有一个和之前`Add`类似的问题 ～ 如果我们传入一个新字，`Update`也会把它添加到字典中.
 
-## Write the test first
+## 先写测试
+
+[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v6/dictionary_test.go)
 
 ```go
 t.Run("existing word", func(t *testing.T) {
@@ -521,44 +440,20 @@ t.Run("new word", func(t *testing.T) {
 })
 ```
 
-We added yet another error type for when the word does not exist. We also modified `Update` to return an `error` value.
+我们需要新加一个错误类型`ErrWordDoesNotExist`，如果更新时键key不存在，就返回这个错误。
 
-## Try and run the test
+## 写程序逻辑
 
-```
-./dictionary_test.go:53:16: dictionary.Update(word, "new test") used as value
-./dictionary_test.go:64:16: dictionary.Update(word, definition) used as value
-./dictionary_test.go:66:23: undefined: ErrWordDoesNotExist
-```
-
-We get 3 errors this time, but we know how to deal with these.
-
-## Write the minimal amount of code for the test to run and check the failing test output
+[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v6/dictionary.go)
 
 ```go
+
 const (
     ErrNotFound         = DictionaryErr("could not find the word you were looking for")
     ErrWordExists       = DictionaryErr("cannot add word because it already exists")
     ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
 )
 
-func (d Dictionary) Update(word, definition string) error {
-    d[word] = definition
-    return nil
-}
-```
-
-We added our own error type and are returning a `nil` error.
-
-With these changes, we now get a very clear error:
-
-```
-dictionary_test.go:66: got error '%!s(<nil>)' want 'cannot update word because it does not exist'
-```
-
-## Write enough code to make it pass
-
-```go
 func (d Dictionary) Update(word, definition string) error {
     _, err := d.Search(word)
 
@@ -575,19 +470,21 @@ func (d Dictionary) Update(word, definition string) error {
 }
 ```
 
-This function looks almost identical to `Add` except we switched when we update the `dictionary` and when we return an error.
+这个函数和`Add`很像，只是字典更新和错误返回逻辑有调整。
 
-### Note on declaring a new error for Update
+### 为更新声明一个新错误类型
 
-We could reuse `ErrNotFound` and not add a new error. However, it is often better to have a precise error for when an update fails.
+我们可以重用`ErrNotFound`，但最好再创建一个新的错误类型，这样在更新失败时可以获得更明确错误提示。
 
-Having specific errors gives you more information about what went wrong. Here is an example in a web app:
+在出错时，明确的错误会给你更多提示信息。例如在一个web应用中:
 
-> You can redirect the user when `ErrNotFound` is encountered, but display an error message when `ErrWordDoesNotExist` is encountered.
+> 如果碰到一个`ErrNotFound`错误，你可以将用户重定向，而当碰到一个`ErrWordDoesNotExist`，你可以显示一个明确错误消息。
 
-Next, let's create a function to `Delete` a word in the dictionary.
+下面，我们来为字典创建一个`Delete`功能。
 
-## Write the test first
+## 先写测试
+
+[`dictionary_test.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v6/dictionary_test.go)
 
 ```go
 func TestDelete(t *testing.T) {
@@ -603,31 +500,11 @@ func TestDelete(t *testing.T) {
 }
 ```
 
-Our test creates a `Dictionary` with a word and then checks if the word has been removed.
+先创建一个`Dictionary`，初始化一个字，然后删除这个字，最后检查这个字确实被删除。
 
-## Try to run the test
+## 写程序逻辑
 
-By running `go test` we get:
-
-```
-./dictionary_test.go:74:6: dictionary.Delete undefined (type Dictionary has no field or method Delete)
-```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-```go
-func (d Dictionary) Delete(word string) {
-
-}
-```
-
-After we add this, the test tells us we are not deleting the word.
-
-```
-dictionary_test.go:78: Expected 'test' to be deleted
-```
-
-## Write enough code to make it pass
+[`dictionary.go`](https://github.com/spring2go/learn-go-with-tests/blob/master/maps/v7/dictionary.go)
 
 ```go
 func (d Dictionary) Delete(word string) {
@@ -635,19 +512,19 @@ func (d Dictionary) Delete(word string) {
 }
 ```
 
-Go has a built-in function `delete` that works on maps. It takes two arguments. The first is the map and the second is the key to be removed.
+Go内置支持`delete`函数，它可以应用于字典。它接收两个参数，第一个是字典(map)，第二个是要删除的键(key)。
 
-The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Add` methods, we don't need to complicate the API with errors.
+`delete`函数没有返回，所以我们的`Delete`方法也没有返回。因为删除一个不存在的键是没有效果的，所以我们没必要像`Update`和`Delete`那样再写switch判断逻辑。
 
-## Wrapping up
+## 总结
 
-In this section, we covered a lot. We made a full CRUD (Create, Read, Update and Delete) API for our dictionary. Throughout the process we learned how to:
+本章我们讲了很多东西，为我们自己定义的字典开发了完整的增删改查(CRUD，Create/Read/Update/Delete)API，通过这个过程我们学到:
 
-* Create maps
-* Search for items in maps
-* Add new items to maps
-* Update items in maps
-* Delete items from a map
-* Learned more about errors
-  * How to create errors that are constants
-  * Writing error wrappers
+* 创建字典
+* 在字典中查找项
+* 给字典添加新项
+* 更新字典中的项
+* 从字典中删除项
+* 学习了更多错误处理技术
+  * 如何创建常量型错我
+  * 编写错误封装

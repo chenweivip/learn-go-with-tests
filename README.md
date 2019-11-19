@@ -20,7 +20,7 @@
 5. [数组Array和切片Slices](arrays-and-slices.md) - 学习数组(Array)，切片(Slice)，`len`函数，可变数量参数(varargs)，`range`函数和测试覆盖率(Test Coverage)。
 6. [结构体struct、方法method和接口interface](structs-methods-and-interfaces.md) - 学习结构体`struct`, 方法methods, 接口`interface`和表驱动测试.
 7. [指针Pointers和错误errors](pointers-and-errors.md) - 学习指针和错误。
-8. [Maps](maps.md) - Learn about storing values in the map data structure.
+8. [字典Maps](maps.md) - 学习如何在字典数据结构中存储值。
 9. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
 10. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
