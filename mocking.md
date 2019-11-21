@@ -1,8 +1,8 @@
 # Mocking
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/mocking)**
+**[本章代码](https://github.com/spring2go/learn-go-with-tests/tree/master/mocking)**
 
-You have been asked to write a program which counts down from 3, printing each number on a new line (with a 1 second pause) and when it reaches zero it will print "Go!" and exit.
+假设你得到一个新需求: 从3开始倒数到1，每个数打印一行(每次隔1秒)，数到0的时候打印"Go!"，然后退出。
 
 ```
 3
@@ -11,7 +11,7 @@ You have been asked to write a program which counts down from 3, printing each n
 Go!
 ```
 
-We'll tackle this by writing a function called `Countdown` which we will then put inside a `main` program so it looks something like this:
+为解决这个问题，我们会写一个函数`Countdown`，在`main`程序里头调用，如下:
 
 ```go
 package main
@@ -21,21 +21,24 @@ func main() {
 }
 ```
 
-While this is a pretty trivial program, to test it fully we will need as always to take an _iterative_, _test-driven_ approach.
+虽然这是一个很简单的程序，但我们仍然会采用**增量式测试驱动**方法。
 
-What do I mean by iterative? We make sure we take the smallest steps we can to have _useful software_.
+增量的意思是～每次都做一小步，但每小步都能生产出有用的软件。
 
-We don't want to spend a long time with code that will theoretically work after some hacking because that's often how developers fall down rabbit holes. **It's an important skill to be able to slice up requirements as small as you can so you can have _working software_.**
+如果每次都花大量时间开发代码，中间没有测试反馈，那么开发人员很容易掉入一个陷阱～看起来代码写得很快很多，但是让这些代码真正工作需要花费大量的hacking和调试时间，而且后续代码的可维护性差。**将需求分解为足够小的步骤，并且每一步都能生产出有用的软件，这种技能是非常重要的。**
 
-Here's how we can divide our work up and iterate on it:
+下面是我们计划的分解和迭代步骤:
 
-- Print 3
-- Print 3, 2, 1 and Go!
-- Wait a second between each line
+- 打印 3
+- 打印 3, 2, 1 和 Go!
+- 每行间隔1秒
 
-## Write the test first
+## 先写测试
 
 Our software needs to print to stdout and we saw how we could use DI to facilitate testing this in the DI section.
+我们的软件要求输出到stdout。在之前的DI章节，我们学习过如何使用DI简化测试。
+
+[countdown_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v1/countdown_test.go)
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -44,52 +47,22 @@ func TestCountdown(t *testing.T) {
     Countdown(buffer)
 
     got := buffer.String()
-    want := "3"
+    expected := "3"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
+    if got != expected {
+        t.Errorf("got %q expected %q", got, expected)
     }
 }
 ```
 
-If anything like `buffer` is unfamiliar to you, re-read [the previous section](dependency-injection.md).
+如果你对`buffer`还不熟悉，那么请先读[前面一章](dependency-injection.md)。
 
-We know we want our `Countdown` function to write data somewhere and `io.Writer` is the de-facto way of capturing that as an interface in Go.
+我们知道我们的`Countdown`函数要将结果写到某处，在Go语言中，`io.Writer`就是能够捕获这种功能的接口。
 
-- In `main` we will send to `os.Stdout` so our users see the countdown printed to the terminal.
-- In test we will send to `bytes.Buffer` so our tests can capture what data is being generated.
+- 在`main`程序种，我们将结果输出到`os.Stdout`，这样用户就可以在终端上看到countdown的结果。
+- 在测试中，我们将结果输出到`bytes.Buffer`，这样我们的测试就可以捕获并测试输出的结果。
 
-## Try and run the test
-
-`./countdown_test.go:11:2: undefined: Countdown`
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-Define `Countdown`
-
-```go
-func Countdown() {}
-```
-
-Try again
-
-```go
-./countdown_test.go:11:11: too many arguments in call to Countdown
-    have (*bytes.Buffer)
-    want ()
-```
-
-The compiler is telling you what your function signature could be, so update it.
-
-```go
-func Countdown(out *bytes.Buffer) {}
-```
-
-`countdown_test.go:17: got '' want '3'`
-
-Perfect!
-
-## Write enough code to make it pass
+## 写程序逻辑
 
 ```go
 func Countdown(out *bytes.Buffer) {
@@ -97,11 +70,11 @@ func Countdown(out *bytes.Buffer) {
 }
 ```
 
-We're using `fmt.Fprint` which takes an `io.Writer` (like `*bytes.Buffer`) and sends a `string` to it. The test should pass.
+我们使用了`fmt.Fprint`，它接受一个`io.Writer`接口(`*bytes.Buffer`遵循这个接口)，并将一个`string`写入到这个接口。现在测试可以通过。
 
-## Refactor
+## 重构
 
-We know that while `*bytes.Buffer` works, it would be better to use a general purpose interface instead.
+虽然`*bytes.Buffer`可以工作，我们最好使用更通用的接口。
 
 ```go
 func Countdown(out io.Writer) {
@@ -109,9 +82,11 @@ func Countdown(out io.Writer) {
 }
 ```
 
-Re-run the tests and they should be passing.
+再次运行测试，应该还是可以通过。
 
-To complete matters, let's now wire up our function into a `main` so we have some working software to reassure ourselves we're making progress.
+下面是完整的主程序，我们在`main`中也调用了`Countdown`，这样我们的主程序也可以工作 ～ 我们小步行进，但是每一步都有可以工作的软件。
+
+[countdown.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v1/countdown.go)
 
 ```go
 package main
@@ -131,15 +106,17 @@ func main() {
 }
 ```
 
-Try and run the program and be amazed at your handywork.
+运行主程序`go run main.go`，确保主程序也可以工作。
 
-Yes this seems trivial but this approach is what I would recommend for any project. **Take a thin slice of functionality and make it work end-to-end, backed by tests.**
+这种测试驱动方法虽然看起来繁琐，但是我们建议对其它项目也都采用该方法。**每次实现一小个功能，让这个功能端到端能够工作，并且用测试覆盖这个功能**。
 
-Next we can make it print 2,1 and then "Go!".
+下面我们来实现打印2,1和"Go!"。
 
-## Write the test first
+## 先写测试
 
-By investing in getting the overall plumbing working right, we can iterate on our solution safely and easily. We will no longer need to stop and re-run the program to be confident of it working as all the logic is tested.
+有了测试代码的保护，我们可以继续迭代。我们不需要频繁停下来运行主程序校验功能，因为测试会确保我们的逻辑的正确的。
+
+[countdown_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v2/countdown_test.go)
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -159,17 +136,9 @@ Go!`
 }
 ```
 
-The backtick syntax is another way of creating a `string` but lets you put things like newlines which is perfect for our test.
+反引号(`)是另外一种创建字符串的语法，它支持字符串中包含新行
 
-## Try and run the test
-
-```
-countdown_test.go:21: got '3' want '3
-        2
-        1
-        Go!'
-```
-## Write enough code to make it pass
+## 写程序逻辑
 
 ```go
 func Countdown(out io.Writer) {
@@ -180,11 +149,13 @@ func Countdown(out io.Writer) {
 }
 ```
 
-Use a `for` loop counting backwards with `i--` and use `fmt.Fprintln` to print to `out` with our number followed by a newline character. Finally use `fmt.Fprint` to send "Go!" aftward.
+我们用`for`循环向后计数(`i--`)，并用`fmt.Fprintln`将计数打印到`out`，每次输出都换行。最后，我们用`fmt.Fprint`输出"Go!"。
 
-## Refactor
+## 重构
 
-There's not much to refactor other than refactoring some magic values into named constants.
+我们可以把一些常量抽取出来:
+
+[main.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v2/main.go)
 
 ```go
 const finalWord = "Go!"
@@ -198,9 +169,9 @@ func Countdown(out io.Writer) {
 }
 ```
 
-If you run the program now, you should get the desired output but we don't have it as a dramatic countdown with the 1 second pauses.
+现在运行测试，可以得到期望的结果，但是我们的计数间隔1秒还没有实现。
 
-Go lets you achieve this with `time.Sleep`. Try adding it in to our code.
+在Go语言中，`time.Sleep`可以实现时间间隔，修改程序如下：
 
 ```go
 func Countdown(out io.Writer) {
@@ -214,24 +185,25 @@ func Countdown(out io.Writer) {
 }
 ```
 
-If you run the program it works as we want it to.
+现在运行测试，也可以通过。
 
 ## Mocking
 
-The tests still pass and the software works as intended but we have some problems:
-- Our tests take 4 seconds to run.
-    - Every forward thinking post about software development emphasises the importance of quick feedback loops.
-    - **Slow tests ruin developer productivity**.
-    - Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 4s added to the test run for every new test of `Countdown`?
-- We have not tested an important property of our function.
+测试仍然可以通过，我们的软件也以预期方式工作，但是我们有一些问题:
 
-We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
+- 我们的一个测试需要花费4秒钟运行！
+    - 软件开发的前瞻性思维都强调快速反馈环的重要性。
+    - **测试慢严重影响开发生产率**
+    - 假设需求变得更复杂，需要更多测试。但是每次运行`Countdown`都要花费4秒钟，你能容忍吗？
+- 我们还要测试程序的其它重要功能。
 
-If we can _mock_ `time.Sleep` we can use _dependency injection_ to use it instead of a "real" `time.Sleep` and then we can **spy on the calls** to make assertions on them.
+我们的程序依赖于`Sleep`ing，我们要将这种依赖抽取出来，这样，我们就可以在测试中控制这种依赖。
 
-## Write the test first
+如果我们可以**mock**掉`time.Sleep`，那么我们就可以使用**依赖注入** ～ 用假的**spy**替代真实的`time.Sleep`，然后在spy中我们可以测试断言。
 
-Let's define our dependency as an interface. This lets us then use a _real_ Sleeper in `main` and a _spy sleeper_ in our tests. By using an interface our `Countdown` function is oblivious to this and adds some flexibility for the caller.
+## 先写测试
+
+我们将依赖定义为一个接口。这样，我们在`main`中可以使用真实的Sleeper，而在测试中用假的spy sleeper。虽然用了接口，但是我们的`Countdown`函数其实并不关心，并且我们还为调用方增加了灵活性。
 
 ```go
 type Sleeper interface {
@@ -239,9 +211,9 @@ type Sleeper interface {
 }
 ```
 
-I made a design decision that our `Countdown` function would not be responsible for how long the sleep is. This simplifies our code a little for now at least and means a user of our function can configure that sleepiness however they like.
+我在`Countdown`函数中做了一些调整，`Countdown`函数本身并不负责sleep时间的长短 ～ 而是由函数的使用方决定。
 
-Now we need to make a _mock_ of it for our tests to use.
+我们先创建一个让测试用的mock：
 
 ```go
 type SpySleeper struct {
@@ -253,9 +225,11 @@ func (s *SpySleeper) Sleep() {
 }
 ```
 
-_Spies_ are a kind of _mock_ which can record how a dependency is used. They can record the arguments sent in, how many times it has been called, etc. In our case, we're keeping track of how many times `Sleep()` is called so we can check it in our test.
+**Spy**是**mock**的一种，可以记录依赖是如何被使用的。Spy可以记录传入的参数，被调用了多少次，等等。在我们的案例中，我们跟踪`Sleep()`被调用了多少次，这样我们在测试中就可以校验。
 
-Update the tests to inject a dependency on our Spy and assert that the sleep has been called 4 times.
+更新测试注入我们的Spy依赖，并且断言sleep被调用了4次。
+
+[countdown_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v3/countdown_test.go)
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -265,54 +239,38 @@ func TestCountdown(t *testing.T) {
     Countdown(buffer, spySleeper)
 
     got := buffer.String()
-    want := `3
+    expected := `3
 2
 1
 Go!`
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
+    if got != expected {
+        t.Errorf("got %q expected %q", got, expected)
     }
 
     if spySleeper.Calls != 4 {
-        t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
+        t.Errorf("not enough calls to sleeper, expected 4 got %d", spySleeper.Calls)
     }
 }
 ```
 
-## Try and run the test
+## 写程序逻辑
 
-```
-too many arguments in call to Countdown
-    have (*bytes.Buffer, *SpySleeper)
-    want (io.Writer)
-```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-We need to update `Countdown` to accept our `Sleeper`
+修改`Countdown`函数，让其接受`Sleeper`接口，并且在其中调用`sleeper.Sleep()`：
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
     for i := countdownStart; i > 0; i-- {
-        time.Sleep(1 * time.Second)
+        sleeper.Sleep()
         fmt.Fprintln(out, i)
     }
 
-    time.Sleep(1 * time.Second)
+    sleeper.Sleep()
     fmt.Fprint(out, finalWord)
 }
 ```
 
-If you try again, your `main` will no longer compile for the same reason
-
-```
-./main.go:26:11: not enough arguments in call to Countdown
-    have (*os.File)
-    want (io.Writer, Sleeper)
-```
-
-Let's create a _real_ sleeper which implements the interface we need
+这时，`main`程序编译会通不过，所以在`main`程序中，我们需要再创建一个真正的sleeper：
 
 ```go
 type DefaultSleeper struct {}
@@ -322,7 +280,9 @@ func (d *DefaultSleeper) Sleep() {
 }
 ```
 
-We can then use it in our real application like so
+然后修改主调用程序：
+
+[main.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v3/main.go)
 
 ```go
 func main() {
@@ -331,29 +291,14 @@ func main() {
 }
 ```
 
-## Write enough code to make it pass
+现在测试可以通过。
 
-The test is now compiling but not passing because we're still calling the `time.Sleep` rather than the injected in dependency. Let's fix that.
+### 还有问题
 
-```go
-func Countdown(out io.Writer, sleeper Sleeper) {
-    for i := countdownStart; i > 0; i-- {
-        sleeper.Sleep()
-        fmt.Fprintln(out, i)
-    }
-
-    sleeper.Sleep()
-    fmt.Fprint(out, finalWord)
-}
-```
-
-The test should pass and no longer taking 4 seconds.
-
-### Still some problems
-
-There's still another important property we haven't tested.
+有一个重要的逻辑我们还没有测试。
 
 `Countdown` should sleep before each print, e.g:
+`Countdown`在每次打印前应该先睡眠，例如:
 
 - `Sleep`
 - `Print N`
@@ -363,9 +308,9 @@ There's still another important property we haven't tested.
 - `Print Go!`
 - etc
 
-Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence.
+上面的测试仅仅断言`Countdown`里头有4次睡眠动作，但是那些睡眠动作的次序没有校验。
 
-When writing tests if you're not confident that your tests are giving you sufficient confidence, just break it! (make sure you have committed your changes to source control first though). Change the code to the following
+在写测试的过程中，如果你对测试不是100%确信，那么只要能举出反例就可以break测试！对`Countdown`做如下改变:
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -382,11 +327,11 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-If you run your tests they should still be passing even though the implementation is wrong.
+虽然实现是错误的，但是测试仍然可以通过。
 
-Let's use spying again with a new test to check the order of operations is correct.
+我们要更新测试，仍然用spy可以校验程序的逻辑次序。
 
-We have two different dependencies and we want to record all of their operations into one list. So we'll create _one spy for them both_.
+我们有两个不同的依赖，并且我们准备把它们的操作记录到一个list中。所以，我们为每个依赖创建一个spy。
 
 ```go
 type CountdownOperationsSpy struct {
@@ -406,9 +351,9 @@ const write = "write"
 const sleep = "sleep"
 ```
 
-Our `CountdownOperationsSpy` implements both `io.Writer` and `Sleeper`, recording every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient.
+`CountdownOperationsSpy`同时实现`io.Writer`和`Sleeper`，它将每次调用记录在一个slice中。在本次测试中，我们只关心操作的次序，所以我们将操作记录在一个操作名slice中就可以了。
 
-We can now add a sub-test into our test suite which verifies our sleeps and prints operate in the order we hope
+现在可以在我们的测试族中添加子测试，这个测试校验睡眠和写入的次序。
 
 ```go
 t.Run("sleep before every print", func(t *testing.T) {
@@ -432,9 +377,11 @@ t.Run("sleep before every print", func(t *testing.T) {
 })
 ```
 
-This test should now fail. Revert `Countdown` back to how it was to fix the test.
+注意，我们之前改了`Countdown`的逻辑，现在需要调整回来，这样测试才能通过。
 
-We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping in between the prints. Finally we can delete our first spy as it's not used anymore.
+我们现在有两个`Sleeper`的spy实现，所以我们需要重构一下测试，让其中一个测输出的内容，另外一个测睡眠和输出操作的次序。最后，我们可以把第一个spy删掉，因为不需要了。
+
+[countdown_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/mocking/v4/countdown_test.go)
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -476,15 +423,16 @@ Go!`
 }
 ```
 
-We now have our function and its 2 important properties properly tested.
+目前我们`Countdown`函数已经满足功能需求，并且逻辑正确。
 
-## Extending Sleeper to be configurable
+## 将Sleeper变成可配置
 
-A nice feature would be for the `Sleeper` to be configurable. This means that we can adjust the sleep time in our main program.
+最好将`Sleeper`变成可配置，这样我们在主程序中就可以调整睡眠时间。
 
-### Write the test first
+### 先写测试
 
 Let's first create a new type for `ConfigurableSleeper` that accepts what we need for configuration and testing.
+我们先创建一个新类型`ConfigurableSleeper`:
 
 ```go
 type ConfigurableSleeper struct {
@@ -493,7 +441,7 @@ type ConfigurableSleeper struct {
 }
 ```
 
-We are using `duration` to configure the time slept and `sleep` as a way to pass in a sleep function. The signature of `sleep` is the same as for `time.Sleep` allowing us to use `time.Sleep` in our real implementation and the following spy in our tests:
+`duration`用于配置睡眠时间，`sleep`则可以传入一个sleep函数。`sleep`的签名和`time.Sleep`是一样的，这样我们在真实实现中就可以用`time.Sleep`，而在测试中用spy:
 
 ```go
 type SpyTime struct {
@@ -505,7 +453,7 @@ func (s *SpyTime) Sleep(duration time.Duration) {
 }
 ```
 
-With our spy in place, we can create a new test for the configurable sleeper.
+有了这个spy，我们就可以为configurable sleeper创建一个新的测试。
 
 ```go
 func TestConfigurableSleeper(t *testing.T) {
@@ -521,31 +469,11 @@ func TestConfigurableSleeper(t *testing.T) {
 }
 ```
 
-There should be nothing new in this test and it is setup very similar to the previous mock tests.
+这个测试没有什么特别的，测试方式和之前的mock测试没有太大不同。
 
-### Try and run the test
-```
-sleeper.Sleep undefined (type ConfigurableSleeper has no field or method Sleep, but does have sleep)
+### 实现程序逻辑
 
-```
-
-You should see a very clear error message indicating that we do not have a `Sleep` method created on our `ConfigurableSleeper`.
-
-### Write the minimal amount of code for the test to run and check failing test output
-```go
-func (c *ConfigurableSleeper) Sleep() {
-}
-```
-
-With our new `Sleep` function implemented we have a failing test.
-
-```
-countdown_test.go:56: should have slept for 5s but slept for 0s
-```
-
-### Write enough code to make it pass
-
-All we need to do now is implement the `Sleep` function for `ConfigurableSleeper`.
+主程序中，我们只需要为`ConfigurableSleeper`添加一个`Sleep`函数:
 
 ```go
 func (c *ConfigurableSleeper) Sleep() {
@@ -553,11 +481,11 @@ func (c *ConfigurableSleeper) Sleep() {
 }
 ```
 
-With this change all of the tests should be passing again and you might wonder why all the hassle as the main program didn't change at all. Hopefully it becomes clear after the following section.
+经过上面的调整，测试可以通过，那么我们为什么要花费力气把Sleeper变成可配置呢？下面会解释。
 
-### Cleanup and refactor
+### 清理和重构
 
-The last thing we need to do is to actually use our `ConfigurableSleeper` in the main function.
+下一步，我们在main主程序中要实际使用`ConfigurableSleeper`:
 
 ```go
 func main() {
@@ -566,67 +494,69 @@ func main() {
 }
 ```
 
-If we run the tests and the program manually, we can see that all the behavior remains the same.
+现在运行测试和主程序，你可以看到结果和之前是一致的。
 
-Since we are using the `ConfigurableSleeper`, it is now safe to delete the `DefaultSleeper` implementation. Wrapping up our program and having a more [generic](https://stackoverflow.com/questions/19291776/whats-the-difference-between-abstraction-and-generalization) Sleeper with arbitrary long countdowns.
+因为我们现在用了`ConfigurableSleeper`，现在可以删除掉`DefaultSleeper`实现了。现在我们有了一个更[通用](https://stackoverflow.com/questions/19291776/whats-the-difference-between-abstraction-and-generalization)的Sleeper，支持可配置睡眠的countdown功能。
 
 ## But isn't mocking evil?
 
-You may have heard mocking is evil. Just like anything in software development it can be used for evil, just like [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
+你可能听说过mocking is evil。正如软件开发中的任何事物都可以是evil的，例如[DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)。
 
-People normally get in to a bad state when they don't _listen to their tests_ and are _not respecting the refactoring stage_.
+如果开发人员不能认真倾听测试的反馈，或者不重视重构，那么通常的结果是他们反而会反感测试。
 
-If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
+当你要测某个功能的时候，如果你的mocking代码变得越来越复杂，或者需要mock掉很多功能，那么你应该检视你的代码设计，这通常是一个信号:
 
-- The thing you are testing is having to do too many things (because it has too many dependencies to mock)
-  - Break the module apart so it does less
-- Its dependencies are too fine-grained
-  - Think about how you can consolidate some of these dependencies into one meaningful module
-- Your test is too concerned with implementation details
-  - Favour testing expected behaviour rather than the implementation
+- 你将要测试的功能承担了太多的职责(因为需要mock掉太多的依赖)
+  - 将功能进一步分解成模块，让它们职责单一
+- 它的依赖太细粒度了
+  - 思考是否可以将某些依赖整合为一个更有意义的模块
+- 你的测试太过专注实现细节
+  - 测试应该关注期望的行为，而非具体实现
 
-Normally a lot of mocking points to _bad abstraction_ in your code.
+通常，太多的mocking表明代码抽象太差。
 
-**What people see here is a weakness in TDD but it is actually a strength**, more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test.
+**不少人认为的TDD的不足，其实是它的优势**，通常，代码很难测，其实是代码设计差的一个表现，换种说法，设计良好的代码更易于测试。
 
-### But mocks and tests are still making my life hard!
+### 但是mock和测试并没有让我的开发变轻松！
 
-Ever run into this situation?
+你是否碰到过这样的场景？
 
-- You want to do some refactoring
-- To do this you end up changing lots of tests
-- You question TDD and make a post on Medium titled "Mocking considered harmful"
+- 你想做一些重构
+- 但是重构需要改很多测试代码
+- 你对TDD产生怀疑，然后在博客上写了一篇文章"Mocking considered harmful"
 
-This is usually a sign of you testing too much _implementation detail_. Try to make it so your tests are testing _useful behaviour_ unless the implementation is really important to how the system runs.
+这种情况的出现，实际表明你测了太多的实现细节。测试应该关注期望的行为，除非实现细节对你的系统的运行很重要。
 
-It is sometimes hard to know _what level_ to test exactly but here are some thought processes and rules I try to follow:
+有时，到底测到什么程度不好把握，下面是一些建议:
 
-- **The definition of refactoring is that the code changes but the behaviour stays the same**. If you have decided to do some refactoring in theory you should be able to do make the commit without any test changes. So when writing a test ask yourself
-  - Am I testing the behaviour I want or the implementation details?
-  - If I were to refactor this code, would I have to make lots of changes to the tests?
-- Although Go lets you test private functions, I would avoid it as private functions are to do with implementation.
-- I feel like if a test is working with **more than 3 mocks then it is a red flag** - time for a rethink on the design
-- Use spies with caution. Spies let you see the insides of the algorithm you are writing which can be very useful but that means a tighter coupling between your test code and the implementation. **Be sure you actually care about these details if you're going to spy on them**
+- **重构的定义是:改变代码但是系统的行为不变**。如果你决定做一些重构，那么理论上，重构完了你可以直接提交代码，不需要改测试。所以写测试的时候要问自己：
+  - 我测试的是系统行为，还是实现细节？
+  - 如果我对这块代码做重构，那么我需要对测试做大调整吗？
+- 虽然Go语言允许你测试私有函数，我建议尽量避免，因为私有函数是关于具体实现的。
+- 我认为如果一个测试使用了超过3个mock，那么这是一个红色信号 ～ 需要花点时间重新思考你的设计。
+- 谨慎使用spy。spy让你可以进入算法实现内部，这点有用，但也意味着测试代码和实现之间的一种紧耦合。**在使用spy的时候，确保你确实需要关注这些细节**。
 
-As always, rules in software development aren't really rules and there can be exceptions. [Uncle Bob's article of "When to mock"](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html) has some excellent pointers.
+软件开发中的规则总有例外，[Uncle Bob's的文章"When to mock"](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html)有一些不错的建议。
 
-## Wrapping up
+## 总结
 
-### More on TDD approach
+### 进一步关于TDD
 
-- When faced with less trivial examples, break the problem down into "thin vertical slices". Try to get to a point where you have _working software backed by tests_ as soon as you can, to avoid getting in rabbit holes and taking a "big bang" approach.
-- Once you have some working software it should be easier to _iterate with small steps_ until you arrive at the software you need.
+- 当你面对比较大的需求时，先将问题分解，分解为可实现的子问题，然后实现这些子问题。每个实现都是可以端到端工作的软件，并且每个实现都要用测试覆盖，测试反馈要快，小步快跑要远远好于"big bang"方法。
+- 一旦你有了可以工作的小软件，你就容易在它基础上进行增量迭代开发，直到开发出你想要的最终软件。
 
 > "When to use iterative development? You should use iterative development only on projects that you want to succeed."
+> 
+> "什么时候要用迭代式开发？如果你想要让项目成功的话，你就需要用迭代式开发"。
 
 Martin Fowler.
 
-### Mocking
+### 关于Mocking
 
-- **Without mocking important areas of your code will be untested**. In our case we would not be able to test that our code paused between each print but there are countless other examples. Calling a service that _can_ fail? Wanting to test your system in a particular state? It is very hard to test these scenarios without mocking.
-- Without mocks you may have to set up databases and other third parties things just to test simple business rules. You're likely to have slow tests, resulting in **slow feedback loops**.
-- By having to spin up a database or a webservice to test something you're likely to have **fragile tests** due to the unreliability of such services.
+- **如果没有mocking，那么代码的很多重要部分就无法被测试覆盖**。在我们的案例中，我们就无法测试`Countdown`在每次输出之间有间隔睡眠时间，当然实际还有很多其它的例子。例如，要测试的系统对一个第三方服务有依赖调用(可能会失败)，或者要测试系统的某种特殊状态等，如果没有mocking就很难测试这些场景。
+- 如果没有mock，那么仅仅只是测试一个简单的业务规则，你可能也需要搭建数据库和其它第三方依赖。然后你的测试就会很慢，导致**慢反馈环**。
+- 因为需要搭建数据库或者Web服务才能测试，所以测试就容易不稳定，因为这些依赖的服务可能不稳定。
 
-Once a developer learns about mocking it becomes very easy to over-test every single facet of a system in terms of the _way it works_ rather than _what it does_. Always be mindful about **the value of your tests** and what impact they would have in future refactoring.
+一旦开发人员学会了mocking这种技术，他们也倾向过度使用mock测试，去测试实现细节(how)，而不是期望行为(what)。因此，在测试前始终要先考虑清楚**测试的价值**，和对未来重构的影响。
 
-In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy to read article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html). In later chapters we will need to write code that depends on others for data, which is where we will show **Stubs** in action.
+本章我们只演示了**Spy**，它只是mock的一种。其实还有不同种类的mocks，[Uncle Bob有一篇易读的文章，解释不同的mock类型](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html)。在后续章节中，我们写的代码会依赖于其它代码提供数据，那时，我们会讲解**Stub**。

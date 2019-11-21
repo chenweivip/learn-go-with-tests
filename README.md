@@ -22,7 +22,7 @@
 7. [指针Pointers和错误errors](pointers-and-errors.md) - 学习指针和错误。
 8. [字典Maps](maps.md) - 学习如何在字典数据结构中存储值。
 9. [依赖注入DI](dependency-injection.md) - 学习依赖注入, 它和接口的关系， 简单介绍io包。
-10. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
+10. [Mocking](mocking.md) - 学习使用mock测试，覆盖那些使用常规测试无法覆盖的代码。
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection

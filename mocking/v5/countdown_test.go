@@ -14,13 +14,13 @@ func TestCountdown(t *testing.T) {
 		Countdown(buffer, &CountdownOperationsSpy{})
 
 		got := buffer.String()
-		want := `3
+		expect := `3
 2
 1
 Go!`
 
-		if got != want {
-			t.Errorf("got %q want %q", got, want)
+		if got != expect {
+			t.Errorf("got %q expect %q", got, expect)
 		}
 	})
 
@@ -28,7 +28,7 @@ Go!`
 		spySleepPrinter := &CountdownOperationsSpy{}
 		Countdown(spySleepPrinter, spySleepPrinter)
 
-		want := []string{
+		expect := []string{
 			sleep,
 			write,
 			sleep,
@@ -39,8 +39,8 @@ Go!`
 			write,
 		}
 
-		if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-			t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+		if !reflect.DeepEqual(expect, spySleepPrinter.Calls) {
+			t.Errorf("expected calls %v got %v", expect, spySleepPrinter.Calls)
 		}
 	})
 }

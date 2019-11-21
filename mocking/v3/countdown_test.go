@@ -12,17 +12,17 @@ func TestCountdown(t *testing.T) {
 	Countdown(buffer, spySleeper)
 
 	got := buffer.String()
-	want := `3
+	expected := `3
 2
 1
 Go!`
 
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
+	if got != expected {
+		t.Errorf("got %q expected %q", got, expected)
 	}
 
 	if spySleeper.Calls != 4 {
-		t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
+		t.Errorf("not enough calls to sleeper, expected 4 got %d", spySleeper.Calls)
 	}
 }
 
