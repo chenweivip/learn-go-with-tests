@@ -1,8 +1,6 @@
 package concurrency
 
-import (
-	"time"
-)
+import "time"
 
 // WebsiteChecker checks a url, returning a bool
 type WebsiteChecker func(string) bool

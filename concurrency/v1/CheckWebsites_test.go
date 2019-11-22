@@ -19,7 +19,7 @@ func TestCheckWebsites(t *testing.T) {
 		"waat://furhurterwe.geds",
 	}
 
-	want := map[string]bool{
+	expect := map[string]bool{
 		"http://google.com":          true,
 		"http://blog.gypsydave5.com": true,
 		"waat://furhurterwe.geds":    false,
@@ -27,7 +27,7 @@ func TestCheckWebsites(t *testing.T) {
 
 	got := CheckWebsites(mockWebsiteChecker, websites)
 
-	if !reflect.DeepEqual(want, got) {
-		t.Fatalf("Wanted %v, got %v", want, got)
+	if !reflect.DeepEqual(expect, got) {
+		t.Fatalf("Expected %v, got %v", expect, got)
 	}
 }
