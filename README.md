@@ -24,7 +24,7 @@
 9. [依赖注入DI](dependency-injection.md) - 学习依赖注入, 它和接口的关系， 简单介绍io包。
 10. [Mocking](mocking.md) - 学习使用mock测试，覆盖那些使用常规测试无法覆盖的代码。
 11. [并发](concurrency.md) - 学习如何写并发程序，让软件运行更快。
-12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
+12. [选择Select](select.md) - 学习如何优雅地在进程间进行同步。
 13. [Reflection](reflection.md) - Learn about reflection
 14. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
 15. [Context](context.md) - Use the context package to manage and cancel long-running processes
