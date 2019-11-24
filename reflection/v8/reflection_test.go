@@ -14,56 +14,56 @@ func TestWalk(t *testing.T) {
 	}{
 		{
 			"Struct with one string field",
-			struct{ Name string }{"Chris"},
-			[]string{"Chris"},
+			struct{ Name string }{"Bobo"},
+			[]string{"Bobo"},
 		},
 		{
 			"Struct with two string fields",
 			struct {
 				Name string
 				City string
-			}{"Chris", "London"},
-			[]string{"Chris", "London"},
+			}{"Bobo", "Shanghai"},
+			[]string{"Bobo", "Shanghai"},
 		},
 		{
 			"Struct with non string field",
 			struct {
 				Name string
 				Age  int
-			}{"Chris", 33},
-			[]string{"Chris"},
+			}{"Bobo", 33},
+			[]string{"Bobo"},
 		},
 		{
 			"Nested fields",
 			Person{
-				"Chris",
-				Profile{33, "London"},
+				"Bobo",
+				Profile{33, "Shanghai"},
 			},
-			[]string{"Chris", "London"},
+			[]string{"Bobo", "Shanghai"},
 		},
 		{
 			"Pointers to things",
 			&Person{
-				"Chris",
-				Profile{33, "London"},
+				"Bobo",
+				Profile{33, "Shanghai"},
 			},
-			[]string{"Chris", "London"},
+			[]string{"Bobo", "Shanghai"},
 		},
 		{
 			"Slices",
 			[]Profile{
-				{33, "London"},
-				{34, "Reykjavík"},
+				{33, "Shanghai"},
+				{34, "Beijing"},
 			},
-			[]string{"London", "Reykjavík"},
+			[]string{"Shanghai", "Beijing"},
 		},
 		{
 			"Arrays",
 			[2]Profile{
-				{33, "London"},
-				{34, "Reykjavík"},
+				{33, "Shanghai"},
+				{34, "Beijing"},
 			},
-			[]string{"London", "Reykjavík"},
+			[]string{"Shanghai", "Beijing"},
 		},
 	}
 
@@ -75,7 +75,7 @@ func TestWalk(t *testing.T) {
 			})
 
 			if !reflect.DeepEqual(got, test.ExpectedCalls) {
-				t.Errorf("got %v, want %v", got, test.ExpectedCalls)
+				t.Errorf("got %v, expect %v", got, test.ExpectedCalls)
 			}
 		})
 	}

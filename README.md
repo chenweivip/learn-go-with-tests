@@ -25,7 +25,7 @@
 10. [Mocking](mocking.md) - 学习使用mock测试，覆盖那些使用常规测试无法覆盖的代码。
 11. [并发](concurrency.md) - 学习如何写并发程序，让软件运行更快。
 12. [选择Select](select.md) - 学习如何优雅地在进程间进行同步。
-13. [Reflection](reflection.md) - Learn about reflection
+13. [反射](reflection.md) - 学习反射。
 14. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
 15. [Context](context.md) - Use the context package to manage and cancel long-running processes
 16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests

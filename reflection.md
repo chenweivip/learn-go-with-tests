@@ -1,46 +1,48 @@
-# Reflection
+# 反射
 
-[From Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
+[本章代码](https://github.com/spring2go/learn-go-with-tests/tree/master/reflection)
 
-> golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside. difficulty level: recursively.
+[来自Twitter的Go语言挑战题](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
 
-To do this we will need to use _reflection_.
+> 写一个函数`walk(x interface{}, fn func(string))`，该函数接受一个struct `x`和一个函数`fn`作为输入，`fn`将对struct `x`中的所有字符串字段进行调用。难度：递归级别。
 
-> Reflection in computing is the ability of a program to examine its own structure, particularly through types; it's a form of metaprogramming. It's also a great source of confusion.
+为了解决这个问题，我们需要用到**反射reflection**。
 
-From [The Go Blog: Reflection](https://blog.golang.org/laws-of-reflection)
+> 编程语言中的反射指的是程序有能力检查自身的结构，主要通过类型检查。它是元编程的一种形式。反射属于高级编程主题，很对开发人员对反射感到困惑。
 
-## What is `interface`?
+来自 [Go 语言博客: 反射](https://blog.golang.org/laws-of-reflection)
 
-We have enjoyed the type-safety that Go has offered us in terms of functions that work with known types, such as `string`, `int` and our own types like `BankAccount`.
+## 到底什么是`interface`?
 
-This means that we get some documentation for free and the compiler will complain if you try and pass the wrong type to a function.
+Go语言支持类型安全(type-safety)，我们已经深有体会，例如声明函数只接受某种明确类型，如`string`，`int`，和我们自己定义的类型如`BankAccount`。
 
-You may come across scenarios though where you want to write a function where you don't know the type at compile time.
+类型安全有很多好处，其中之一是一眼就可以看出支持的类型(相当于一种文档)，另外一个是编译器检查，如果传错类型，编译器会告诉我们。
 
-Go lets us get around this with the type `interface{}` which you can think of as just _any_ type.
+但是你也可能碰到一种场景 ～ 要写一个函数，但是在编译期还不知道具体的参数类型。
 
-So `walk(x interface{}, fn func(string))` will accept any value for `x`.
+Go语言允许你用`interface{}`这种类型来表达**任意**类型。
 
-### So why not use `interface` for everything and have really flexible functions?
+所以`walk(x interface{}, fn func(string))`可以接受任意类型的值作为`x`。
 
-- As a user of a function that takes `interface` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler won't be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
-- As a writer of such a function, you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
+### 既然`interface`可以代表任何类型，为何还要定义具体类型的函数呢？
 
-In short only use reflection if you really need to.
+- 如果一个函数直接接受`interface`作为输入，那么它就会失去类型安全(type safety)检查。假如你想将`Foo.bar`(string类型)传给一个函数，结果却传了`Foo.baz`(int类型)，那会怎样？编译器无法给你错误提示。你也无法知道函数到底接受哪种类型的输入。如果函数明确声明接受某种类型的参数(例如`UserService`类型)，那你就不会轻易弄错。
+- 作为写函数的作者，你就需要对输入的参数进行检查，检查输入的是什么类型，然后再对其做适当处理。这一般需要通过**反射**才能做到。这种做法比较复杂，代码比较难读，性能也会下降(因为需要做运行时类型检查）。
 
-If you want polymorphic functions, consider if you could design it around an interface (not `interface`, confusingly) so that users can use your function with multiple types if they implement whatever methods you need for your function to work.
+简言之，只有在真正需要时才考虑使用反射。
 
-Our function will need to be able to work with lots of different things. As always we'll take an iterative approach, writing tests for each new thing we want to support and refactoring along the way until we're done.
+如果你想要多态函数(polymorphic functions)，先考虑你是否能够采用面向接口的设计方式(注意不是直接传`interface{}`)，这样你的函数就可以接受多个类型（只要这些类型实现你定义的接口)。
 
-## Write the test first
+本次案例中，我们的函数要处理很多不同类型。和之前一样，我们将采用迭代方法，每支持一个功能，我们从先写测试开始，然后在此基础上不断重构，直到实现最终目标。
 
-We'll want to call our function with a struct that has a string field in it (`x`). Then we can spy on the function (`fn`) passed in to see if it is called.
+## 先写测试
+
+我们先从只有一个字段的struct开始：
 
 ```go
 func TestWalk(t *testing.T) {
 
-    expected := "Chris"
+    expected := "Bobo"
     var got []string
 
     x := struct {
@@ -52,43 +54,16 @@ func TestWalk(t *testing.T) {
     })
 
     if len(got) != 1 {
-        t.Errorf("wrong number of function calls, got %d want %d", len(got), 1)
+        t.Errorf("wrong number of function calls, got %d expect %d", len(got), 1)
     }
 }
 ```
 
-- We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters, we have made dedicated types for this to spy on function/method invocations but in this case, we can just pass in an anonymous function for `fn` that closes over `got`.
-- We use an anonymous `struct` with a `Name` field of type string to go for the simplest "happy" path.
-- Finally, call `walk` with `x` and the spy and for now just check the length of `got`, we'll be more specific with our assertions once we've got something very basic working.
+`walk`函数接受一个匿名struct x，和一个匿名函数。struct x中只有一个字段，存储我们的期望字符串。匿名函数接受一个字符串输入，并将字符串添加到`got` slice中。刚开始我们先简单点，只检查`got`的长度是否满足期望，后面我们会细化进一步检查具体内容。
 
-## Try to run the test
+## 写程序逻辑
 
-```
-./reflection_test.go:21:2: undefined: walk
-```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-We need to define `walk`
-
-```go
-func walk(x interface{}, fn func(input string)) {
-
-}
-```
-
-Try and run the test again
-
-```
-=== RUN   TestWalk
---- FAIL: TestWalk (0.00s)
-    reflection_test.go:19: wrong number of function calls, got 0 want 1
-FAIL
-```
-
-## Write enough code to make it pass
-
-We can call the spy with any string to make this pass.
+为了让上面的测试通过，我们可以给fn调用传任意字符串：
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -96,11 +71,11 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-The test should now be passing. The next thing we'll need to do is make a more specific assertion on what our `fn` is being called with.
+测试现在可以通过。下一步我们要具体断言`fn`被调用时，接受的是真正的字符串参数。
 
-## Write the test first
+## 先写测试
 
-Add the following to the existing test to check the string passed to `fn` is correct
+修改测试，校验`fn`中接收到的字符串(在`got[0]`中)，和期望的字符串一致。
 
 ```go
 if got[0] != expected {
@@ -108,16 +83,9 @@ if got[0] != expected {
 }
 ```
 
-## Try to run the test
+## 完成程序逻辑
 
-```
-=== RUN   TestWalk
---- FAIL: TestWalk (0.00s)
-    reflection_test.go:23: got 'I still can't believe South Korea beat Germany 2-0 to put them last in their group', want 'Chris'
-FAIL
-```
-
-## Write enough code to make it pass
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v1/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -127,24 +95,26 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-This code is _very unsafe and very naive_ but remembers our goal when we are in "red" (the tests failing) is to write the smallest amount of code possible. We then write more tests to address our concerns.
+上面的代码**既不安全也不完整**，但是还记得我们的TDD和增量驱动方法吗？我们的目标是小步行进，用最少代码先让它能工作，后面我们会不断重构优化。
 
-We need to use reflection to have a look at `x` and try and look at its properties.
+我们需要使用反射来检查`x`，看它内部的属性。
 
-The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line.
+[反射包](https://godoc.org/reflect)里头有一个函数`ValueOf`，它可以返回一个变量的`Value`。然后我们就可以检查这个值，包括它的字段(见代码下一行)。
 
-We then make some very optimistic assumptions about the value passed in
+然后，我们对传入的值做了一些乐观假设：
 
-- We look at the first and only field, there may be no fields at all which would cause a panic
-- We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
+- 我们只检查第一个(也是唯一的一个)字段，如果一个字段都没有的话，那么就会导致panic。
+- 然后我们对字段调用了`String()`方法，它将底层的值以string形式返回，如果底层的值无法以string形式返回，那么就会出错。
 
-## Refactor
+## 重构
 
-Our code is passing for the simple case but we know our code has a lot of shortcomings.
+对于简单的情况，我们的测试可以通过，但是我们知道目前的代码还有很多不足。
 
-We're going to be writing a number of tests where we pass in different values and checking the array of strings that `fn` was called with.
+我会写更多测试，传入不同的值，让`fn`对不同值进行调用，然后检查`got` slice的值满足期望。
 
-We should refactor our test into a table based test to make this easier to continue testing new scenarios.
+我们将测试重构为表驱动测试，这样方便我们继续测试新的场景。
+
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v1/reflection_test.go)
 
 ```go
 func TestWalk(t *testing.T) {
@@ -158,8 +128,8 @@ func TestWalk(t *testing.T) {
             "Struct with one string field",
             struct {
                 Name string
-            }{ "Chris"},
-            []string{"Chris"},
+            }{ "Bobo"},
+            []string{"Bobo"},
         },
     }
 
@@ -171,18 +141,20 @@ func TestWalk(t *testing.T) {
             })
 
             if !reflect.DeepEqual(got, test.ExpectedCalls) {
-                t.Errorf("got %v, want %v", got, test.ExpectedCalls)
+                t.Errorf("got %v, expect %v", got, test.ExpectedCalls)
             }
         })
     }
 }
 ```
 
-Now we can easily add a scenario to see what happens if we have more than one string field.
+显然我们可以很容易添加新的场景，比如超过1个string字段的场景。
 
-## Write the test first
+## 先写测试
 
-Add the following scenario to the `cases`.
+在我们的测试用例中添加如下场景：
+
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v2/reflection_test.go)
 
 ```go
 {
@@ -190,20 +162,14 @@ Add the following scenario to the `cases`.
     struct {
         Name string
         City string
-    }{"Chris", "London"},
-    []string{"Chris", "London"},
+    }{"Bobo", "Shanghai"},
+    []string{"Bobo", "Shanghai"},
 }
 ```
 
-## Try to run the test
+## 调整程序逻辑
 
-```
-=== RUN   TestWalk/Struct_with_two_string_fields
-    --- FAIL: TestWalk/Struct_with_two_string_fields (0.00s)
-        reflection_test.go:40: got [Chris], want [Chris London]
-```
-
-## Write enough code to make it pass
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v2/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -216,17 +182,17 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-`value` has a method `NumField` which returns the number of fields in the value. This lets us iterate over the fields and call `fn` which passes our test.
+`val`有一个方法`NumField`，可以返回这个值所有的字段数量。然后我们可以对所有字段进行迭代，并对每个字段调用`fn`方法。
 
-## Refactor
+## 完善
 
-It doesn't look like there's any obvious refactors here that would improve the code so let's press on.
+我们的程序有一个不足：`walk`假定每个字段都是`string`类型的，所以我们需要对代码进行完善。我们先写测试：
 
-The next shortcoming in `walk` is that it assumes every field is a `string`. Let's write a test for this scenario.
+## 先写测试
 
-## Write the test first
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v3/reflection_test.go)
 
-Add the following case
+添加如下测试用例：
 
 ```go
 {
@@ -234,22 +200,16 @@ Add the following case
     struct {
         Name string
         Age  int
-    }{"Chris", 33},
-    []string{"Chris"},
+    }{"Bobo", 33},
+    []string{"Bobo"},
 },
 ```
 
-## Try to run the test
+## 调整程序逻辑
 
-```
-=== RUN   TestWalk/Struct_with_non_string_field
-    --- FAIL: TestWalk/Struct_with_non_string_field (0.00s)
-        reflection_test.go:46: got [Chris <int Value>], want [Chris]
-```
+我们需要检查字段的类型是`string`：
 
-## Write enough code to make it pass
-
-We need to check that the type of the field is a `string`.
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v3/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -265,17 +225,17 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-We can do that by checking its [`Kind`](https://godoc.org/reflect#Kind).
+可以通过字段的[`Kind`](https://godoc.org/reflect#Kind)检查其类型。
 
-## Refactor
+## 重构
 
-Again it looks like the code is reasonable enough for now.
+现在的代码比之前要完善很多。
 
-The next scenario is what if it isn't a "flat" `struct`? In other words, what happens if we have a `struct` with some nested fields?
+下一个场景，如果传入的`struct`不是扁平结构，而是嵌套结构的，怎么办？
 
-## Write the test first
+## 先写测试
 
-We have been using the anonymous struct syntax to declare types ad-hocly for our tests so we could continue to do that like so
+之前我们使用过匿名struct语法，很方便，这里我们可以继续使用：
 
 ```go
 {
@@ -286,19 +246,21 @@ We have been using the anonymous struct syntax to declare types ad-hocly for our
             Age  int
             City string
         }
-    }{"Chris", struct {
+    }{"Bobo", struct {
         Age  int
         City string
-    }{33, "London"}},
-    []string{"Chris", "London"},
+    }{33, "Shanghai"}},
+    []string{"Bobo", "Shanghai"},
 },
 ```
 
-But we can see that when you get inner anonymous structs the syntax gets a little messy. [There is a proposal to make it so the syntax would be nicer](https://github.com/golang/go/issues/12854).
+值得注意的是，使用匿名struct语法之后，代码会比较难读。[社区有提议优化这种语法](https://github.com/golang/go/issues/12854)。
 
-Let's just refactor this by making a known type for this scenario and reference it in the test. There is a little indirection in that some of the code for our test is outside the test but readers should be able to infer the structure of the `struct` by looking at the initialisation.
+我们来重构一下，专门为这个场景创建一个新类型，然后在测试中引用这个类型。这对测试来说会引入一些复杂性 ～ 有些用于测试的代码在测试之外，但是读者可以通过初始化方式推断出`struct`的结构来。
 
-Add the following type declarations somewhere in your test file
+在测试代码下方添加如下类型声明：
+
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v4/reflection_test.go)
 
 ```go
 type Person struct {
@@ -312,30 +274,22 @@ type Profile struct {
 }
 ```
 
-Now we can add this to our cases which reads a lot clearer than before
+调整测试代码，使用`Person`类型进行初始化，现在测试代码看起来会更清楚：
 
 ```go
 {
     "Nested fields",
     Person{
-        "Chris",
-        Profile{33, "London"},
+        "Bobo",
+        Profile{33, "Shanghai"},
     },
-    []string{"Chris", "London"},
+    []string{"Bobo", "Shanghai"},
 },
 ```
 
-## Try to run the test
+## 调整程序逻辑
 
-```
-=== RUN   TestWalk/Nested_fields
-    --- FAIL: TestWalk/Nested_fields (0.00s)
-        reflection_test.go:54: got [Chris], want [Chris London]
-```
-
-The problem is we're only iterating on the fields on the first level of the type's hierarchy.
-
-## Write enough code to make it pass
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v4/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -355,9 +309,9 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-The solution is quite simple, we again inspect its `Kind` and if it happens to be a `struct` we just call `walk` again on that inner `struct`.
+解决办法很简单，我们仍然检查字段的`Kind`，如果是`struct`类型，我们就对内嵌的`struct`再次调用`walk`(递归调用)。
 
-## Refactor
+## 重构
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -376,26 +330,28 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-When you're doing a comparison on the same value more than once _generally_ refactoring into a `switch` will improve readability and make your code easier to extend.
+如果对某个值的比较超过两次，建议可以重构为`switch`方式，让代码易读也易于扩展。
 
-What if the value of the struct passed in is a pointer?
+下一步，如果传入的是一个指针会如何？
 
-## Write the test first
+## 先写测试
 
-Add this case
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v5/reflection_test.go)
+
+添加一个测试用例：
 
 ```go
 {
     "Pointers to things",
     &Person{
-        "Chris",
-        Profile{33, "London"},
+        "Bobo",
+        Profile{33, "Shanghai"},
     },
-    []string{"Chris", "London"},
+    []string{"Bobo", "Shanghai"},
 },
 ```
 
-## Try to run the test
+## 测试通不过
 
 ```
 === RUN   TestWalk/Pointers_to_things
@@ -403,7 +359,7 @@ panic: reflect: call of reflect.Value.NumField on ptr Value [recovered]
     panic: reflect: call of reflect.Value.NumField on ptr Value
 ```
 
-## Write enough code to make it pass
+## 实现程序逻辑
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -426,11 +382,13 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-You can't use `NumField` on a pointer `Value`, we need to extract the underlying value before we can do that by using `Elem()`.
+不能在一个指针`Value`上使用`NumField`，对于指针类型，我们先要使用`Elem`取出底层的值。
 
-## Refactor
+## 重构
 
-Let's encapsulate the responsibility of extracting the `reflect.Value` from a given `interface{}` into a function.
+我们把从一个`interface{}`取出`reflect.Value`的动作重构为一个函数`getValue`。
+
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v5/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -459,39 +417,29 @@ func getValue(x interface{}) reflect.Value {
 }
 ```
 
-This actually adds _more_ code but I feel the abstraction level is right.
+这样做会让代码变多，但是这种重构在抽象级别上看是正确的。
 
-- Get the `reflect.Value` of `x` so I can inspect it, I don't care how.
-- Iterate over the fields, doing whatever needs to be done depending on its type.
+- 先通过`getValue`从`x`中取出`reflect.Value`，这样我们不必关心是指针还是非指针。
+- 再对字段进行迭代，根据其类型做相应处理。
 
-Next, we need to cover slices.
+下一步，我们要来考虑切片slice的场景。
 
-## Write the test first
+## 先写测试
+
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v6/reflection_test.go)
 
 ```go
 {
     "Slices",
     []Profile {
-        {33, "London"},
-        {34, "Reykjavík"},
+        {33, "Shanghai"},
+        {34, "Beijing"},
     },
-    []string{"London", "Reykjavík"},
+    []string{"Shanghai", "Beijing"},
 },
 ```
 
-## Try to run the test
-
-```
-=== RUN   TestWalk/Slices
-panic: reflect: call of reflect.Value.NumField on slice Value [recovered]
-    panic: reflect: call of reflect.Value.NumField on slice Value
-```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-This is similar to the pointer scenario before, we are trying to call `NumField` on our `reflect.Value` but it doesn't have one as it's not a struct.
-
-## Write enough code to make it pass
+## 实现程序逻辑
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -517,18 +465,18 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-## Refactor
+## 重构
 
-This works but it's yucky. No worries, we have working code backed by tests so we are free to tinker all we like.
+上面的代码可以工作，但是质量不高。不必担心，我们的代码受测试保护，我们可以根据需要大胆重构。
 
-If you think a little abstractly, we want to call `walk` on either
+如果你稍微抽象地思考一下，我们想让`walk`调用的是：
 
-- Each field in a struct
-- Each _thing_ in a slice
+- struct上的每个字段
+- slice中的每个值(未知类型)
 
-Our code at the moment does this but doesn't reflect it very well. We just have a check at the start to see if it's a slice (with a `return` to stop the rest of the code executing) and if it's not we just assume it's a struct.
+我们的代码目前可以工作，但是抽象得不太好。我们先检查是否是slice（如果是的话，迭代执行完`walk`之后就返回)，然后我们再检查struct场景。
 
-Let's rework the code so instead we check the type _first_ and then do our work.
+我们可以重构代码，先检查类型，再做具体工作`walk`：
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -549,9 +497,11 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-Looking much better! If it's a struct or a slice we iterate over its values calling `walk` on each one. Otherwise, if it's a `reflect.String` we can call `fn`.
+现在看起来代码要好不少！如果是一个struct(或slice)，我们就对每个字段(或每个索引)对应的值迭代调用`walk`。否则，如果是`reflect.String`的话，我们就直接调用`fn`。
 
-Still, to me it feels like it could be better. There's repetition of the operation of iterating over fields/values and then calling `walk` but conceptually they're the same.
+对我来说，还可以重构得更好。对字段(或索引)对应值的迭代调用有重复，但是从概念上讲，它们是一样的。
+
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v6/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -577,43 +527,39 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-If the `value` is a `reflect.String` then we just call `fn` like normal.
+如果`value`是一个`reflect.string`，那么我们就像之前一样直接调用`fn`。
 
-Otherwise, our `switch` will extract out two things depending on the type
+否则，我们的`switch`将根据类型取出两样东西：
 
-- How many fields there are
-- How to extract the `Value` (`Field` or `Index`)
+- 有多少个字段
+- 如何取出值`Value`(通过`Field`或者`Index`函数)
 
-Once we've determined those things we can iterate through `numberOfValues` calling `walk` with the result of the `getField` function.
+一旦我们取得上述数据，我们就可以迭代`numberOfValues`次，每次调用`walk`，传入`getField`函数调用的结果值。
 
-Now we've done this, handling arrays should be trivial.
+下面我们来考虑array情况，有了处理slice的经验，处理array应该不复杂。
 
-## Write the test first
+## 先写测试
 
-Add to the cases
+添加一个测试用例：
+
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v7/reflection_test.go)
 
 ```go
 {
     "Arrays",
     [2]Profile {
-        {33, "London"},
-        {34, "Reykjavík"},
+        {33, "Shanghai"},
+        {34, "Beijing"},
     },
-    []string{"London", "Reykjavík"},
+    []string{"Shanghai", "Beijing"},
 },
 ```
 
-## Try to run the test
+## 实现程序逻辑
 
-```
-=== RUN   TestWalk/Arrays
-    --- FAIL: TestWalk/Arrays (0.00s)
-        reflection_test.go:78: got [], want [London Reykjavík]
-```
+Array的处理方式和slice类似，所以我们只需添加一个逗号分隔：
 
-## Write enough code to make it pass
-
-Arrays can be handled the same way as slices, so just add it to the case with a comma
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v7/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -639,9 +585,9 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-The final type we want to handle is `map`.
+我们要处理的最后一个类型是`map`。
 
-## Write the test first
+## 先写测试
 
 ```go
 {
@@ -654,17 +600,9 @@ The final type we want to handle is `map`.
 },
 ```
 
-## Try to run the test
+## 写程序逻辑
 
-```
-=== RUN   TestWalk/Maps
-    --- FAIL: TestWalk/Maps (0.00s)
-        reflection_test.go:86: got [], want [Bar Boz]
-```
-
-## Write enough code to make it pass
-
-Again if you think a little abstractly you can see that `map` is very similar to `struct`, it's just the keys are unknown at compile time.
+再抽象思考一下，你会发现`map`和`struct`非常像，只是`map`的keys在编译时还未知。
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -694,15 +632,17 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-However, by design you cannot get values out of a map by index. It's only done by _key_, so that breaks our abstraction, darn.
+但是，你不能通过index从map中获取值，只能通过**key**，所以之前的抽象被破环了。
 
-## Refactor
+## 重构
 
-How do you feel right now? It felt like maybe a nice abstraction at the time but now the code feels a little wonky.
+你现在感觉如何？之前的抽象让我们感觉良好，但是现在代码的味道又不太好了。
 
-_This is OK!_ Refactoring is a journey and sometimes we will make mistakes. A major point of TDD is it gives us the freedom to try these things out.
+**这很正常**，重构是一个过程，期间我们可能会犯错误。TDD的一大好处是，它给我们以试错的自由。
 
-By taking small steps backed by tests this is in no way an irreversible situation. Let's just put it back to how it was before the refactor.
+我们的每一步都有测试保护，所以我们完全可以回到之前的步骤。让我们回到重构之前。
+
+[reflection.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v8/reflection.go)
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -731,13 +671,15 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-We've introduced `walkValue` which DRYs up the calls to `walk` inside our `switch` so that they only have to extract out the `reflect.Value`s from `val`.
+我们引入了一个`walkValue`匿名函数，这样我们不用在`switch`中直接调用`walk`，代码看起来抽象一致，更清晰。
 
-### One final problem
+### 最后一个问题
 
-Remember that maps in Go do not guarantee order. So your tests will sometimes fail because we assert that the calls to `fn` are done in a particular order.
+Go语言中的map并不保证顺序。所以你的测试有时会失败，因为我们的断言要求对`fn`是按特定顺序调用的。
 
-To fix this, we'll need to move our assertion with the maps to a new test where we do not care about the order.
+为了修复这个问题，我们需要将对map用例的断言移出，做成一个单独的测试助手函数，这样我们就不必关心顺序问题。
+
+[reflection_test.go](https://github.com/spring2go/learn-go-with-tests/blob/master/reflection/v8/reflection_test.go)
 
 ```go
 t.Run("with maps", func(t *testing.T) {
@@ -756,7 +698,7 @@ t.Run("with maps", func(t *testing.T) {
 })
 ```
 
-Here is how `assertContains` is defined
+这是`assertContains`的定义：
 
 ```go
 func assertContains(t *testing.T, haystack []string, needle string)  {
@@ -772,10 +714,10 @@ func assertContains(t *testing.T, haystack []string, needle string)  {
 }
 ```
 
-## Wrapping up
+## 总结
 
-- Introduced some of the concepts from the `reflect` package.
-- Used recursion to traverse arbitrary data structures.
-- Did an in retrospect bad refactor but didn't get too upset about it. By working iteratively with tests it's not such a big deal.
-- This only covered a small aspect of reflection. [The Go blog has an excellent post covering more details](https://blog.golang.org/laws-of-reflection).
-- Now that you know about reflection, do your best to avoid using it.
+- 引入了`reflect`包中的一些概念。
+- 使用递归遍历任意的数据结构
+- 中间做了一次不成功的重构尝试，但是由于采用TDD和增量方法，我们很容易回到重构之前。
+- 本章只是涉及了反射的很小一部分。[Go语言博客有一篇博文讲解关于反射的更多内容](https://blog.golang.org/laws-of-reflection)
+- 虽然你已经学习了反射，但是在实践中，还是尽量避免使用反射。

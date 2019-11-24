@@ -16,16 +16,16 @@ func TestWalk(t *testing.T) {
 			"Struct with one string field",
 			struct {
 				Name string
-			}{"Chris"},
-			[]string{"Chris"},
+			}{"Bobo"},
+			[]string{"Bobo"},
 		},
 		{
 			"Struct with two string fields",
 			struct {
 				Name string
 				City string
-			}{"Chris", "London"},
-			[]string{"Chris", "London"},
+			}{"Bobo", "Shanghai"},
+			[]string{"Bobo", "Shanghai"},
 		},
 	}
 
@@ -37,7 +37,7 @@ func TestWalk(t *testing.T) {
 			})
 
 			if !reflect.DeepEqual(got, test.ExpectedCalls) {
-				t.Errorf("got %v, want %v", got, test.ExpectedCalls)
+				t.Errorf("got %v, expect %v", got, test.ExpectedCalls)
 			}
 		})
 	}
